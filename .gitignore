@@ -6,3 +6,4 @@
 *.pio*
 *ArduinoIDE*
 *.DS_Store*
+ESP32-RTSP/.gitignore
