@@ -1,0 +1,9 @@
+*old*
+*Old*
+*wifikeys*
+*lib*
+*.vscode*
+*.pio*
+*ArduinoIDE*
+*.DS_Store*
+ESP32-RTSP/.gitignore
