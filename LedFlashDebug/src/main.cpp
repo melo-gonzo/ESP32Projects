@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-// ledPin refers to ESP32-CAM GPIO 4 (flashlight)
-const int ledPin = 4;
+// ledPin refers to ESP32-CAM mini led on back. Use GPIO pin 4 for flashlight
+const int ledPin = 33;
 
 void setup()
 {
