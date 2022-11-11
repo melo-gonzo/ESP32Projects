@@ -28,6 +28,31 @@
 
    - v50 apr 13, 2021 - tidy
    - v50lpmod apr 28, 2021 - shut off low power modem
+   - v53 jul 8, 2021 - get rid on no wifi message cloggoing up log file
+   - v56 dec 23, 2021 - tzchar to 60 bytes
+                      - add esp32 sd filemanager to download files
+   - v57 dec 28, 2021 - final changes to https://github.com/jameszah/ESPxWebFlMgr/tree/master/esp32_sd_file_manager
+   - v58 dec 30, 2021 - changes for Arduino 1.8.19 and esp32 Board Library 2.0.2
+         jan 12, 2022 - add dates to file manager
+                      - add simple version of config.txt configuration
+   - 58.9 apr 29,2022 - re-connect wifi after failure
+                      - correct mdns for wifiman configuration
+                      - CAMERA_GRAB_LATEST
+                      - enable streaming faster than recording
+    -v59.0 may 8,2022 - host mode as an option for wifi
+    -v59.3 may 17,2022 - time to camera in ap moce
+    -v59.4 may 18,2022 - miltiple photo function, defualt to ap after ssid fails
+    -v59.5 may 19, 2022 - improve streaming speed
+                        - drop CAMERA_GRAB_LATEST for speed
+    -v60.4 jun 15,2022 - two channels of streaming on port 821 and 82 to kept webpage working on port 80
+                       - file manager still on 8080
+                       - tidy up web page
+                       - assume a better frame rate if reboot during recording and no index is written
+                       - start wifi after the recording starts to sped things up
+     60.4.5  - semaphore and framebuffer2/3 when using capture sytle video streaming
+             - wifi dns reset
+          .6  - repeat dns every 5 minutes
+          .7  - every 15
 
   https://github.com/jameszah/ESP32-CAM-Video-Recorder-junior
 
@@ -39,23 +64,35 @@
     - Partition Scheme Huge APP (3MB No OTA)
     - or with AI Thinker ESP32-CAM
 
-  Compiled with Arduino 1.8.13, and esp32-arduino core version 1.06, which is the current version as of Apr 13, 2021.
+  Needs these libraries or better:
 
-  ... and then it will compile the Arduuino esp32-core with ov5640 support, and use the following other libraries.
 
-  Using library FS at version 1.0 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\FS
-  Using library SD_MMC at version 1.0 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\SD_MMC
-  Using library EEPROM at version 1.0.3 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\EEPROM
-  Using library WiFi at version 1.0 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\WiFi
-  Using library WiFiManager at version 2.0.3-alpha in folder: C:\ArduinoPortable\arduino-1.8.13\portable\sketchbook\libraries\WiFiManager
-  Using library WebServer at version 1.0 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\WebServer
-  Using library DNSServer at version 1.1.0 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\DNSServer
-  Using library ESPmDNS at version 1.0 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\ESPmDNS
-  Using library HTTPClient at version 1.2 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\HTTPClient
-  Using library WiFiClientSecure at version 1.0 in folder: C:\ArduinoPortable\arduino-1.8.13\portable\packages\esp32\hardware\esp32\1.0.6\libraries\WiFiClientSecure
+  Compiled with Arduino 1.8.19, and esp32-arduino core version 2.0.4, on Sep 13, 2022
 
-  Sketch uses 1107274 bytes (35%) of program storage space. Maximum is 3145728 bytes.
-  Global variables use 59860 bytes (18%) of dynamic memory, leaving 267820 bytes for local variables. Maximum is 327680 bytes.
+Linking everything together...
+"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r2-patch3/bin/xtensa-esp32-elf-g++" "-Wl,--Map=C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.map" "-LC:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/sdk/esp32/lib" "-LC:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/sdk/esp32/ld" "-LC:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/sdk/esp32/qio_qspi" -T esp32.rom.redefined.ld -T memory.ld -T sections.ld -T esp32.rom.ld -T esp32.rom.api.ld -T esp32.rom.libgcc.ld -T esp32.rom.newlib-data.ld -T esp32.rom.syscalls.ld -T esp32.peripherals.ld -mlongcalls -Wno-frame-address -Wl,--cref -Wl,--gc-sections -fno-rtti -fno-lto -u ld_include_hli_vectors_bt -u _Z5setupv -u _Z4loopv -u esp_app_desc -u pthread_include_pthread_impl -u pthread_include_pthread_cond_impl -u pthread_include_pthread_local_storage_impl -u pthread_include_pthread_rwlock_impl -u include_esp_phy_override -u ld_include_highint_hdl -u start_app -u start_app_other_cores -u __ubsan_include -Wl,--wrap=longjmp -u __assert_func -u vfs_include_syscalls_impl -Wl,--undefined=uxTopUsedPriority -u app_main -u newlib_include_heap_impl -u newlib_include_syscalls_impl -u newlib_include_pthread_impl -u newlib_include_assert_impl -u __cxa_guard_dummy -DESP32 -DCORE_DEBUG_LEVEL=0 -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue -mfix-esp32-psram-cache-strategy=memw -DARDUINO_USB_CDC_ON_BOOT=0 -Wl,--start-group "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\sketch\\CRC32.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\sketch\\ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\sketch\\ESPxWebFlMgr.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\FS\\FS.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\FS\\vfs_api.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\SD_MMC\\SD_MMC.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\EEPROM\\EEPROM.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFi.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiAP.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiClient.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiGeneric.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiMulti.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiSTA.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiScan.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiServer.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiUdp.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\ESPmDNS\\ESPmDNS.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WebServer\\Parsing.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WebServer\\WebServer.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WebServer\\detail\\mimetable.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\HTTPClient\\HTTPClient.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFiClientSecure\\esp_crt_bundle.c.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFiClientSecure\\WiFiClientSecure.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFiClientSecure\\ssl_client.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\core\\core.a" -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lasio -lbt -lcbor -lunity -lcmock -lcoap -lnghttp -lesp-tls -lesp_adc_cal -lesp_hid -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lesp_https_server -lesp_lcd -lprotobuf-c -lprotocomm -lmdns -lesp_local_ctrl -lsdmmc -lesp_serial_slave_link -lesp_websocket_client -lexpat -lwear_levelling -lfatfs -lfreemodbus -ljsmn -ljson -llibsodium -lmqtt -lopenssl -lperfmon -lspiffs -lulp -lwifi_provisioning -lbutton -lrmaker_common -ljson_parser -ljson_generator -lesp_schedule -lesp_rainmaker -lqrcode -lws2812_led -lesp-dsp -lesp-sr -lesp32-camera -lesp_littlefs -lfb_gfx -lasio -lcbor -lcmock -lunity -lcoap -lesp_lcd -lesp_websocket_client -lexpat -lfreemodbus -ljsmn -llibsodium -lperfmon -lesp_adc_cal -lesp_hid -lfatfs -lwear_levelling -lopenssl -lesp_rainmaker -lesp_local_ctrl -lesp_https_server -lwifi_provisioning -lprotocomm -lbt -lbtdm_app -lprotobuf-c -lmdns -lrmaker_common -lmqtt -ljson_parser -ljson_generator -lesp_schedule -lqrcode -lcat_face_detect -lhuman_face_detect -lcolor_detect -lmfn -ldl -lwakenet -lmultinet -lesp_audio_processor -lesp_audio_front_end -lesp-sr -lwakenet -lmultinet -lesp_audio_processor -lesp_audio_front_end -ljson -lspiffs -ldl_lib -lc_speech_features -lhilexin_wn5 -lhilexin_wn5X2 -lhilexin_wn5X3 -lnihaoxiaozhi_wn5 -lnihaoxiaozhi_wn5X2 -lnihaoxiaozhi_wn5X3 -lnihaoxiaoxin_wn5X3 -lcustomized_word_wn5 -lmultinet2_ch -lesp_tts_chinese -lvoice_set_xiaole -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lphy -lrtc -lesp_phy -lphy -lrtc -lesp_phy -lphy -lrtc -lxt_hal -lm -lnewlib -lstdc++ -lpthread -lgcc -lcxx -lapp_trace -lgcov -lapp_trace -lgcov -lc -Wl,--end-group -Wl,-EL -o "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.elf"
+"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\tools\\esptool_py\\3.3.0/esptool.exe" --chip esp32 elf2image --flash_mode dio --flash_freq 80m --flash_size 4MB -o "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.bin" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.elf"
+esptool.py v3.3
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/gen_esp32part.exe" -q "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/partitions.csv" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.partitions.bin"
+Multiple libraries were found for "WiFi.h"
+ Used: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WiFi
+ Not used: C:\ArduinoPortable\arduino-1.8.19\libraries\WiFi
+Using library FS at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\FS
+Using library SD_MMC at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\SD_MMC
+Using library EEPROM at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\EEPROM
+Using library WiFi at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WiFi
+Using library ESPmDNS at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\ESPmDNS
+Using library WebServer at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WebServer
+Using library HTTPClient at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\HTTPClient
+Using library WiFiClientSecure at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WiFiClientSecure
+"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r2-patch3/bin/xtensa-esp32-elf-size" -A "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.elf"
+Sketch uses 1033573 bytes (32%) of program storage space. Maximum is 3145728 bytes.
+Global variables use 59164 bytes (18%) of dynamic memory, leaving 268516 bytes for local variables. Maximum is 327680 bytes.
+
+
 
 */
 
@@ -69,26 +106,26 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // user edits here:
 
-static const char vernum[] = "v50lpmod";
+static const char vernum[] = "v60.4.7";
 char devname[30];
 String devstr = "ccam";
 
-int IncludeInternet = 0; // 0 for no internet, 1 for time only, 2 streaming with WiFiMan, 3 ssid in file, 4 default internet on and file
+int IncludeInternet = 0; // 0 for no internet, 1 for time only, 2  WiFiMan, 3 ssid in file, 4 ssid in file default off, 5 host mode
 
 const char *ssid = "jzjzjz";
-const char *password = "jzjzjz";
 
 // https://sites.google.com/a/usapiens.com/opnode/time-zones  -- find your timezone here
 String TIMEZONE = "GMT0BST,M3.5.0/01,M10.5.0/02";
-
+// String TIMEZONE = "MST7MDT,M3.2.0/2:00:00,M11.1.0/2:00:00";
 #define Lots_of_Stats 1
+#define blinking 0
 
 int framesize = FRAMESIZE_HD;
 int quality = 12;
 int framesizeconfig = FRAMESIZE_UXGA;
 int qualityconfig = 5;
 int buffersconfig = 3;
-int avi_length = 30;     // how long a movie in seconds -- 1800 sec = 30 min
+int avi_length = 30;   // how long a movie in seconds -- 1800 sec = 30 min
 int frame_interval = 0;  // record at full speed
 int speed_up_factor = 1; // play at realtime
 int stream_delay = 500;  // minimum of 500 ms delay between frames
@@ -99,16 +136,20 @@ int MagicNumber = 12;    // change this number to reset the eprom in your esp32 
 bool configfile = false;
 bool InternetOff = true;
 bool reboot_now = false;
+bool restart_now = false;
 String cssid;
 String cpass;
 String czone;
+char apssid[30];
+char appass[14];
 
 TaskHandle_t the_camera_loop_task;
 TaskHandle_t the_sd_loop_task;
 TaskHandle_t the_streaming_loop_task;
 
-SemaphoreHandle_t wait_for_sd;
-SemaphoreHandle_t sd_go;
+static SemaphoreHandle_t wait_for_sd;
+static SemaphoreHandle_t sd_go;
+SemaphoreHandle_t baton;
 
 long current_frame_time;
 long last_frame_time;
@@ -153,7 +194,15 @@ float most_recent_fps = 0;
 int most_recent_avg_framesize = 0;
 
 uint8_t *framebuffer;
+uint8_t *framebuffer2;
+uint8_t *framebuffer3;
+
 int framebuffer_len;
+int framebuffer2_len;
+int framebuffer3_len;
+long framebuffer_time = 0;
+long framebuffer2_time = 0;
+long framebuffer3_time = 0;
 
 int first = 1;
 long frame_start = 0;
@@ -187,7 +236,10 @@ long delay_wait_for_sd = 0;
 long wait_for_cam = 0;
 
 int do_it_now = 0;
-
+int gframe_cnt;
+int gfblen;
+int gj;
+int gmdelay;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  Avi Writer Stuff here
@@ -260,8 +312,8 @@ static const frameSizeStruct frameSizeData[] = {
     {{0x90, 0x01}, {0x28, 0x01}}, // FRAMESIZE_CIF,      // 400x296       bytes per buffer required in psram - quality must be higher number (lower quality) than config quality
     {{0xE0, 0x01}, {0x40, 0x01}}, // FRAMESIZE_HVGA,     // 480x320       low qual  med qual  high quality
     {{0x80, 0x02}, {0xE0, 0x01}}, // FRAMESIZE_VGA,      // 640x480   8   11+   ##  6-10  ##  0-5         indoor(56,COUNT=3)  (56,COUNT=2)          (56,count=1)
-                                  //               38,400    61,440    153,600
-    {{0x20, 0x03}, {0x58, 0x02}}, // FRAMESIZE_SVGA,     // 800x600   9
+    //               38,400    61,440    153,600
+    {{0x20, 0x03}, {0x58, 0x02}}, // FRAMESIZE_SVGA,     // 800x600   9                       240,000
     {{0x00, 0x04}, {0x00, 0x03}}, // FRAMESIZE_XGA,      // 1024x768  10
     {{0x00, 0x05}, {0xD0, 0x02}}, // FRAMESIZE_HD,       // 1280x720  11  115,200   184,320   460,800     (11)50.000  25.4fps   (11)50.000 12fps    (11)50,000  12.7fps
     {{0x00, 0x05}, {0x00, 0x04}}, // FRAMESIZE_SXGA,     // 1280x1024 12
@@ -505,7 +557,7 @@ const int avi_header[AVIOFFSET] PROGMEM = {
     0x79,
     0x20,
     0x76,
-    0x35,
+    0x36,
     0x30,
     0x20,
     0x4C,
@@ -595,7 +647,7 @@ void major_fail()
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-static esp_err_t config_camera()
+static void config_camera()
 {
 
   camera_config_t config;
@@ -629,6 +681,9 @@ static esp_err_t config_camera()
   config.frame_size = (framesize_t)framesizeconfig;
   config.jpeg_quality = qualityconfig;
   config.fb_count = buffersconfig;
+
+  // https://github.com/espressif/esp32-camera/issues/357#issuecomment-1047086477
+  // config.grab_mode      = CAMERA_GRAB_LATEST;
 
   if (Lots_of_Stats)
   {
@@ -686,8 +741,8 @@ static esp_err_t config_camera()
   ss->set_brightness(ss, 1);  // up the blightness just a bit
   ss->set_saturation(ss, -2); // lower the saturation
 
-  delay(800);
-  for (int j = 0; j < 4; j++)
+  delay(500);
+  for (int j = 0; j < 10; j++)
   {
     camera_fb_t *fb = esp_camera_fb_get(); // get_good_jpeg();
     if (!fb)
@@ -700,10 +755,12 @@ static esp_err_t config_camera()
       Serial.print(fb->len);
       Serial.printf(", new fb %X\n", (long)fb->buf);
       esp_camera_fb_return(fb);
-      delay(50);
+      delay(10);
     }
   }
-  return ESP_OK;
+  Serial.printf("End of setup ...");
+  Serial.printf("Internal Total heap %d, internal Free Heap %d, ", ESP.getHeapSize(), ESP.getFreeHeap());
+  Serial.printf("SPIRam Total heap   %d, SPIRam Free Heap   %d\n", ESP.getPsramSize(), ESP.getFreePsram());
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -750,118 +807,7 @@ static esp_err_t init_sdcard()
   return ESP_OK;
 }
 
-void read_config_file()
-{
-
-  // put a file "config.txt" onto SD card, to set parameters different from your hardcoded parameters
-  // it should look like this - one paramter per line, in the correct order, followed by 2 spaces, and any comments you choose
-  /*
-  desklens  // camera name for files, mdns, etc
-  11  // framesize 9=svga, 10=xga, 11=hd, 12=sxga, 13=uxga, 14=fhd, 17=qxga, 18=qhd, 21=qsxga
-  8  // quality 0-63, lower the better, 10 good start, must be higher than "quality config"
-  11  // framesize config - must be equal or higher than framesize
-  5  / quality config - high q 0..5, med q 6..10, low q 11+
-  3  // buffers - 1 is half speed of 3, but you might run out od memory with 3 and framesize > uxga
-  900  // length of video in seconds
-  0  // interval - ms between frames - 0 for fastest, or 500 for 2fps, 10000 for 10 sec/frame
-  1  // speedup - multiply framerate - 1 for realtime, 24 for record at 1fps, play at 24fps or24x
-  0  // streamdelay - ms between streaming frames - 0 for fast as possible, 500 for 2fps
-  4  // 0 no internet, 1 get time then shutoff, 2 streaming using wifiman, 3 for use ssid names below default off, 4 names below default on
-  MST7MDT,M3.2.0/2:00:00,M11.1.0/2:00:00  // timezone - this is mountain time, find timezone here https://sites.google.com/a/usapiens.com/opnode/time-zones
-  ssid1234  // ssid
-  mrpeanut  // ssid password
-
-  Lines above are rigid - do not delete lines, must have 2 spaces after the number or string
-  */
-
-  File config_file = SD_MMC.open("/config.txt", "r");
-  if (!config_file)
-  {
-    Serial.println("Failed to open config_file for reading");
-  }
-  else
-  {
-    String junk;
-    Serial.println("Reading config.txt");
-    String cname = config_file.readStringUntil(' ');
-    junk = config_file.readStringUntil('\n');
-    int cframesize = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    int cquality = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-
-    int cframesizeconfig = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    int cqualityconfig = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    int cbuffersconfig = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-
-    int clength = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    int cinterval = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    int cspeedup = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    int cstreamdelay = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    int cinternet = config_file.parseInt();
-    junk = config_file.readStringUntil('\n');
-    String czone = config_file.readStringUntil(' ');
-    junk = config_file.readStringUntil('\n');
-    cssid = config_file.readStringUntil(' ');
-    junk = config_file.readStringUntil('\n');
-    cpass = config_file.readStringUntil(' ');
-    junk = config_file.readStringUntil('\n');
-    config_file.close();
-
-    Serial.printf("=========   Data fram config.txt   =========\n");
-    Serial.printf("Name %s\n", cname);
-    logfile.printf("Name %s\n", cname);
-    Serial.printf("Framesize %d\n", cframesize);
-    logfile.printf("Framesize %d\n", cframesize);
-    Serial.printf("Quality %d\n", cquality);
-    logfile.printf("Quality %d\n", cquality);
-    Serial.printf("Framesize config %d\n", cframesizeconfig);
-    logfile.printf("Framesize config%d\n", cframesizeconfig);
-    Serial.printf("Quality config %d\n", cqualityconfig);
-    logfile.printf("Quality config%d\n", cqualityconfig);
-    Serial.printf("Buffers config %d\n", cbuffersconfig);
-    logfile.printf("Buffers config %d\n", cbuffersconfig);
-    Serial.printf("Length %d\n", clength);
-    logfile.printf("Length %d\n", clength);
-    Serial.printf("Interval %d\n", cinterval);
-    logfile.printf("Interval %d\n", cinterval);
-    Serial.printf("Speedup %d\n", cspeedup);
-    logfile.printf("Speedup %d\n", cspeedup);
-    Serial.printf("Streamdelay %d\n", cstreamdelay);
-    logfile.printf("Streamdelay %d\n", cstreamdelay);
-    Serial.printf("Internet %d\n", cinternet);
-    logfile.printf("Internet %d\n", cinternet);
-    // Serial.printf("Zone len %d, %s\n", czone.length(), czone); //logfile.printf("Zone len %d, %s\n", czone.length(), czone);
-    Serial.printf("Zone len %d\n", czone.length());
-    logfile.printf("Zone len %d\n", czone.length());
-    Serial.printf("ssid %s\n", cssid);
-    logfile.printf("ssid %s\n", cssid);
-    Serial.printf("pass %s\n", cpass);
-    logfile.printf("pass %s\n", cpass);
-
-    framesize = cframesize;
-    quality = cquality;
-    framesizeconfig = cframesizeconfig;
-    qualityconfig = cqualityconfig;
-    buffersconfig = cbuffersconfig;
-    avi_length = clength;
-    frame_interval = cinterval;
-    speed_up_factor = cspeedup;
-    stream_delay = cstreamdelay;
-    IncludeInternet = cinternet;
-    configfile = true;
-    TIMEZONE = czone;
-
-    cname.toCharArray(devname, cname.length() + 1);
-  }
-}
+#include "config.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
@@ -912,7 +858,7 @@ void deleteFolderOrFile(const char *val)
 {
   // Function provided by user @gemi254
   Serial.printf("Deleting : %s\n", val);
-  File f = SD_MMC.open(val);
+  File f = SD_MMC.open("/" + String(val));
   if (!f)
   {
     Serial.printf("Failed to open %s\n", val);
@@ -948,7 +894,7 @@ void deleteFolderOrFile(const char *val)
     }
     f.close();
     // Remove the dir
-    if (SD_MMC.rmdir(val))
+    if (SD_MMC.rmdir("/" + String(val)))
     {
       Serial.printf("Dir %s removed\n", val);
     }
@@ -960,7 +906,7 @@ void deleteFolderOrFile(const char *val)
   else
   {
     // Remove the file
-    if (SD_MMC.remove(val))
+    if (SD_MMC.remove("/" + String(val)))
     {
       Serial.printf("File %s deleted\n", val);
     }
@@ -1117,8 +1063,12 @@ camera_fb_t *get_good_jpeg()
 
               if (frame_cnt % 100 == 50)
               {
-                Serial.printf("Frame %6d, len %6d, extra  %4d, cam time %7d ", frame_cnt, fblen, j - 1, mdelay / 1000);
-                logfile.printf("Frame %6d, len %6d, extra  %4d, cam time %7d ", frame_cnt, fblen, j - 1, mdelay / 1000);
+                gframe_cnt = frame_cnt;
+                gfblen = fblen;
+                gj = j;
+                gmdelay = mdelay;
+                // Serial.printf("Frame %6d, len %6d, extra  %4d, cam time %7d ", frame_cnt, fblen, j - 1, mdelay / 1000);
+                // logfile.printf("Frame %6d, len %6d, extra  %4d, cam time %7d ", frame_cnt, fblen, j - 1, mdelay / 1000);
                 do_it_now = 1;
               }
             }
@@ -1232,7 +1182,7 @@ void do_eprom_read()
 // start_avi - open the files and write in headers
 //
 
-static esp_err_t start_avi()
+static void start_avi()
 {
 
   long start = millis();
@@ -1280,6 +1230,27 @@ static esp_err_t start_avi()
 
   size_t err = avifile.write(buf, AVIOFFSET);
 
+  uint8_t ex_fps = 1;
+  if (frame_interval == 0)
+  {
+    if (framesize >= 11)
+    {
+      ex_fps = 12.5 * speed_up_factor;
+      ;
+    }
+    else
+    {
+      ex_fps = 25.0 * speed_up_factor;
+    }
+  }
+  else
+  {
+    ex_fps = round(1000.0 / frame_interval * speed_up_factor);
+  }
+
+  avifile.seek(0x84, SeekSet);
+  print_quartet((int)ex_fps, avifile);
+
   avifile.seek(AVIOFFSET, SeekSet);
 
   Serial.print(F("\nRecording "));
@@ -1314,7 +1285,7 @@ static esp_err_t start_avi()
 
   logfile.flush();
   avifile.flush();
-  return 0;
+
 } // end of start avi
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1323,7 +1294,7 @@ static esp_err_t start_avi()
 //           -- pass in a fb pointer to the frame to add
 //
 
-static esp_err_t another_save_avi(camera_fb_t *fb)
+static void another_save_avi(camera_fb_t *fb)
 {
 
   long start = millis();
@@ -1423,11 +1394,13 @@ static esp_err_t another_save_avi(camera_fb_t *fb)
 
   movi_size = movi_size + remnant;
 
-  if (do_it_now == 1)
+  if (do_it_now == 1 && frame_cnt < 1011)
   {
     do_it_now = 0;
-    Serial.printf(" sd time %4d -- \n", millis() - bw);
-    logfile.printf(" sd time %4d -- \n", millis() - bw);
+    Serial.printf("Frame %6d, len %6d, extra  %4d, cam time %7d,  sd time %4d -- \n", gframe_cnt, gfblen, gj - 1, gmdelay / 1000, millis() - bw);
+    logfile.printf("Frame % 6d, len % 6d, extra  % 4d, cam time % 7d,  sd time % 4d -- \n", gframe_cnt, gfblen, gj - 1, gmdelay / 1000, millis() - bw);
+    // Serial.printf(" sd time %4d -- \n",  millis() - bw);
+    // logfile.printf(" sd time %4d -- \n",  millis() - bw);
     logfile.flush();
   }
 
@@ -1435,7 +1408,7 @@ static esp_err_t another_save_avi(camera_fb_t *fb)
   time_in_sd += (millis() - start);
 
   avifile.flush();
-  return 0;
+
 } // end of another_pic_avi
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1443,7 +1416,7 @@ static esp_err_t another_save_avi(camera_fb_t *fb)
 //  end_avi writes the index, and closes the files
 //
 
-static esp_err_t end_avi()
+static void end_avi()
 {
 
   long start = millis();
@@ -1575,7 +1548,7 @@ static esp_err_t end_avi()
     idxfile.close();
     avifile.close();
 
-    int xx = remove("/idx.tmp");
+    int xx = SD_MMC.remove("/idx.tmp");
   }
 
   Serial.println("---");
@@ -1602,397 +1575,40 @@ static esp_err_t end_avi()
   logfile.printf("time total      %10dms, %4.1f%%\n", time_total, 100.0 * time_total / time_total);
 
   logfile.flush();
-  return 0;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Time
-// #include "time.h"
+#include "time.h"
 
-// // Workaround for the WebServer.h vs esp_http_server.h problem  https://github.com/tzapu/WiFiManager/issues/1184
+// Workaround for the WebServer.h vs esp_http_server.h problem  https://github.com/tzapu/WiFiManager/issues/1184
+/*
+  #define _HTTP_Method_H_
 
-// #define _HTTP_Method_H_
-
-// typedef enum {
-//   jHTTP_GET     = 0b00000001,
-//   jHTTP_POST    = 0b00000010,
-//   jHTTP_DELETE  = 0b00000100,
-//   jHTTP_PUT     = 0b00001000,
-//   jHTTP_PATCH   = 0b00010000,
-//   jHTTP_HEAD    = 0b00100000,
-//   jHTTP_OPTIONS = 0b01000000,
-//   jHTTP_ANY     = 0b01111111,
-// } HTTPMethod;
-
-// #include <WiFi.h>
-// #include <WiFiManager.h>
-// #include <ESPmDNS.h>
+  typedef enum {
+  jHTTP_GET     = 0b00000001,
+  jHTTP_POST    = 0b00000010,
+  jHTTP_DELETE  = 0b00000100,
+  jHTTP_PUT     = 0b00001000,
+  jHTTP_PATCH   = 0b00010000,
+  jHTTP_HEAD    = 0b00100000,
+  jHTTP_OPTIONS = 0b01000000,
+  jHTTP_ANY     = 0b01111111,
+  } HTTPMethod;
+*/
+//#include "C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.3\libraries\WiFi\src\WiFi.h"
+#include "WiFi.h"
+//#include "C:\ArduinoPortable\sketch\libraries\WiFiManager\WiFiManager.h"
+//#include "WiFiManager.h"
+#include "ESPmDNS.h"
 
 time_t now;
-// struct tm timeinfo;
-// char localip[20];
-// WiFiEventId_t eventID;
-
-// bool init_wifi()
-// {
-//   int connAttempts = 0;
-
-//   uint32_t brown_reg_temp = READ_PERI_REG(RTC_CNTL_BROWN_OUT_REG);
-//   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-
-//   if (IncludeInternet >= 3) {
-
-//     WiFi.disconnect(true, true);
-//     WiFi.mode(WIFI_STA);
-//     WiFi.setHostname(devname);
-
-//     char ssidch[20];
-//     char passch[20];
-//     cssid.toCharArray(ssidch, cssid.length() + 1);
-//     cpass.toCharArray(passch, cpass.length() + 1);
-//     Serial.printf("ssid >%s<, pass >%s<\n", ssidch, passch);
-//     WiFi.begin(ssidch, passch);
-
-//     while (WiFi.status() != WL_CONNECTED ) {
-//       delay(1000);
-//       Serial.print(".");
-//       if (connAttempts++ == 15) break;     // try for 15 seconds to get internet, then give up
-//     }
-//     configTime(0, 0, "pool.ntp.org");
-//     char tzchar[60];
-//     //Serial.printf("Str >%s<, Char >%s<\n",TIMEZONE,tzchar);
-//     TIMEZONE.toCharArray(tzchar, TIMEZONE.length());          // name of your camera for mDNS, Router, and filenames
-//     setenv("TZ", tzchar, 1);  // mountain time zone from #define at top
-//     tzset();
-
-//     time(&now);
-
-//     while (now < 15) {        // try for 15 seconds to get the time, then give up - 10 seconds after boot
-//       delay(1000);
-//       Serial.print("o");
-//       time(&now);
-//     }
-
-//     Serial.print("Local time: "); Serial.print(ctime(&now));
-//     sprintf(localip, "%s", WiFi.localIP().toString().c_str());
-//     Serial.print("IP: "); Serial.println(localip); Serial.println(" ");
-//     InternetOff = false;
-
-//     if (!MDNS.begin(devname)) {
-//       Serial.println("Error setting up MDNS responder!");
-//     } else {
-//       Serial.printf("mDNS responder started '%s'\n", devname);
-//     }
-
-//     eventID = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-//       Serial.printf( "\nframe_cnt: %8d, WiFi event Reason: %d , Status: %d\n", frame_cnt, info.disconnected.reason, WiFi.status());
-//       logfile.printf("\nframe_cnt: %8d, WiFi event Reason: %d , Status: %d\n", frame_cnt, info.disconnected.reason, WiFi.status());
-//     });
-
-//   } else {
-
-//     WiFiManager wm;
-//     bool res;
-//     wm.setHostname(devname);
-//     //wm.resetSettings();  // for debugging - erase the ssid every time
-
-//     wm.setConnectTimeout(20); // how long to try to connect for before continuing
-//     wm.setConfigPortalTimeout(30); // auto close configportal after n seconds
-//     // res = wm.autoConnect(); // auto generated AP name from chipid
-
-//     res = wm.autoConnect("esp32cam-config"); // use the devname defined above, with no password
-//     //res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
-
-//     if (res) {
-//       Serial.println("Succesful Connection using WiFiManager");
-//       Serial.printf("\nInternet status: %d\n", WiFi.status());
-
-//       eventID = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-//         Serial.printf( "\nframe_cnt: %8d, WiFi event Reason: %d , Status: %d\n", frame_cnt, info.disconnected.reason, WiFi.status());
-//         logfile.printf("\nframe_cnt: %8d, WiFi event Reason: %d , Status: %d\n", frame_cnt, info.disconnected.reason, WiFi.status());
-
-//       });
-
-//       configTime(0, 0, "pool.ntp.org");
-//       char tzchar[60];
-//       TIMEZONE.toCharArray(tzchar, TIMEZONE.length());          // name of your camera for mDNS, Router, and filenames
-//       setenv("TZ", tzchar, 1);  // mountain time zone from #define at top
-//       tzset();
-
-//       time(&now);
-
-//       while (now < 15) {        // try for 5 seconds to get the time, then give up - 10 seconds after boot
-//         delay(1000);
-//         Serial.print("o");
-//         time(&now);
-//       }
-
-//       Serial.print("Local time: "); Serial.print(ctime(&now));
-//       sprintf(localip, "%s", WiFi.localIP().toString().c_str());
-//       Serial.print("IP: "); Serial.println(localip); Serial.println(" ");
-//       InternetOff = false;
-//     } else {
-
-//       InternetOff = true;
-//       Serial.println("Internet failed using WiFiManager - not starting Web services");
-//     }
-//   }
-
-// // typedef enum {
-// //    WIFI_PS_NONE,        /**< No power save */
-// //    WIFI_PS_MIN_MODEM,   /**< Minimum modem power saving. In this mode, station wakes up to receive beacon every DTIM period */
-// //    WIFI_PS_MAX_MODEM,   /**< Maximum modem power saving. In this mode, interval to receive beacons is determined by the listen_interval
-// //                              parameter in wifi_sta_config_t.
-// //                              Attention: Using this option may cause ping failures. Not recommended */
-// // } wifi_ps_type_t;
-
-//   wifi_ps_type_t the_type;
-
-//   esp_err_t get_ps = esp_wifi_get_ps(&the_type);
-//   Serial.printf("The power save was: %d\n",the_type);
-
-//   Serial.printf("Set power save to %d\n", WIFI_PS_NONE);
-//   esp_err_t set_ps = esp_wifi_set_ps(WIFI_PS_NONE);
-
-//   esp_err_t new_ps = esp_wifi_get_ps(&the_type);
-//   Serial.printf("The power save is : %d\n",the_type);
-
-//   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, brown_reg_temp);
-//   return true;
-
-// }
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//
-#include <HTTPClient.h>
-
-httpd_handle_t camera_httpd = NULL;
-char the_page[4000];
-
-static esp_err_t capture_handler(httpd_req_t *req)
-{
-
-  long start = millis();
-
-  camera_fb_t *fb = NULL;
-  esp_err_t res = ESP_OK;
-  char fname[100];
-  int file_number = 0;
-
-  // Serial.print("capture, core ");  Serial.print(xPortGetCoreID());
-  // Serial.print(", priority = "); Serial.println(uxTaskPriorityGet(NULL));
-
-  file_number++;
-
-  sprintf(fname, "inline; filename=capture_%d.jpg", file_number);
-
-  if (fb_next == NULL)
-  {
-    fb = get_good_jpeg(); // esp_camera_fb_get();
-    framebuffer_len = fb->len;
-    memcpy(framebuffer, fb->buf, framebuffer_len);
-    esp_camera_fb_return(fb);
-  }
-  else
-  {
-    fb = fb_next;
-    framebuffer_len = fb->len;
-    memcpy(framebuffer, fb->buf, framebuffer_len);
-  }
-
-  httpd_resp_set_type(req, "image/jpeg");
-  httpd_resp_set_hdr(req, "Content-Disposition", fname);
-
-  res = httpd_resp_send(req, (const char *)framebuffer, framebuffer_len);
-
-  time_in_web1 += (millis() - start);
-  return res;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//
-static esp_err_t index_handler(httpd_req_t *req)
-{
-
-  long start = millis();
-
-  Serial.print("http index, core ");
-  Serial.print(xPortGetCoreID());
-  Serial.print(", priority = ");
-  Serial.println(uxTaskPriorityGet(NULL));
-
-  const char the_message[] = "Status";
-
-  time(&now);
-  const char *strdate = ctime(&now);
-
-  int tot = SD_MMC.totalBytes() / (1024 * 1024);
-  int use = SD_MMC.usedBytes() / (1024 * 1024);
-  long rssi = WiFi.RSSI();
-
-  const char msg[] PROGMEM = R"rawliteral(<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>%s ESP32-CAM Video Recorder Junior</title>
-</head>
-<body>
-<h1>%s<br>ESP32-CAM Video Recorder Junior %s <br><font color="red">%s</font></h1><br>
-
- Used / Total SD Space <font color="red"> %d MB / %d MB</font><br>
- Rssi %d<br>
-
- Filename: %s <br>
- Framesize %d, Quality %d, Frame %d <br>
- Avg framesize %d, fps %.1f <br>
- Time left in current video %d seconds<br>
- <br>
- <h3><a href="http://%s/">http://%s/</a></h3>
- <h3><a href="http://%s/stream">Stream  </a></h3>
- <h3><a href="http://%s/photos">Photos - 10 saveable photos every 3 seconds </a></h3>
-
-</body>
-</html>)rawliteral";
-
-  int time_left = (-millis() + (avi_start_time + avi_length * 1000)) / 1000;
-
-  if (start_record == 0)
-  {
-    time_left = 0;
-  }
-
-  sprintf(the_page, msg, devname, devname, vernum, strdate, use, tot, rssi, avi_file_name,
-          framesize, quality, frame_cnt, most_recent_avg_framesize, most_recent_fps, time_left);
-  // ,
-  // localip, localip, localip, localip);
-
-  httpd_resp_send(req, the_page, strlen(the_page));
-
-  time_in_web1 += (millis() - start);
-  return ESP_OK;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//
-static esp_err_t photos_handler(httpd_req_t *req)
-{
-
-  long start = millis();
-
-  Serial.print("http photos, core ");
-  Serial.print(xPortGetCoreID());
-  Serial.print(", priority = ");
-  Serial.println(uxTaskPriorityGet(NULL));
-  // Serial.printf("Internal Total heap %d, internal Free Heap %d\n", ESP.getHeapSize(), ESP.getFreeHeap());
-  // Serial.printf("SPIRam Total heap   %d, SPIRam Free Heap   %d\n", ESP.getPsramSize(), ESP.getFreePsram());
-
-  const char the_message[] = "Status";
-
-  time(&now);
-  const char *strdate = ctime(&now);
-
-  const char msg[] PROGMEM = R"rawliteral(<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>%s ESP32-CAM Video Recorder Junior</title>
-</head>
-<body>
-<h1>%s<br>ESP32-CAM Video Recorder Junior %s <br><font color="red">%s</font></h1><br>
- <br>
- One photo every 3 seconds for 30 seconds - roll forward or back - refresh for more live photos
- <br>
-
-<br><div id="image-container"></div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var c = document.location.origin;
-  const ic = document.getElementById('image-container');  
-  var i = 1;
-  
-  var timing = 3000; // time between snapshots for multiple shots
-
-  function loop() {
-    ic.insertAdjacentHTML('beforeend','<img src="'+`${c}/capture?_cb=${Date.now()}`+'">')
-    ic.insertAdjacentHTML('beforeend','<br>')
-    ic.insertAdjacentHTML('beforeend',Date())
-    ic.insertAdjacentHTML('beforeend','<br>')
-
-    i = i + 1;
-    if ( i <= 10 ) {             // 10 frames
-      window.setTimeout(loop, timing);
-    }
-  }
-  loop();
-  
-})
-</script><br>
-</body>
-</html>)rawliteral";
-
-  sprintf(the_page, msg, devname, devname, vernum, strdate);
-
-  httpd_resp_send(req, the_page, strlen(the_page));
-  time_in_web1 += (millis() - start);
-  return ESP_OK;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//  Streaming stuff based on Random Nerd
-//
-
-bool start_streaming = false;
-
-#define PART_BOUNDARY "123456789000000000000987654321"
-
-static const char *_STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
-static const char *_STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
-static const char *_STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
-
-void the_streaming_loop(void *pvParameter);
-
-static esp_err_t stream_handler(httpd_req_t *req)
-{
-
-  long start = millis();
-
-  Serial.print("stream_handler, core ");
-  Serial.print(xPortGetCoreID());
-  Serial.print(", priority = ");
-  Serial.println(uxTaskPriorityGet(NULL));
-
-  start_streaming = true;
-
-  xTaskCreatePinnedToCore(the_streaming_loop, "the_streaming_loop", 8000, req, 1, &the_streaming_loop_task, 0);
-
-  if (the_streaming_loop_task == NULL)
-  {
-    // vTaskDelete( xHandle );
-    Serial.printf("do_the_steaming_task failed to start! %d\n", the_streaming_loop_task);
-  }
-
-  time_in_web1 += (millis() - start);
-
-  while (start_streaming == true)
-  { // we have to keep the *req alive
-    delay(1000);
-    // Serial.print("z");
-  }
-  Serial.println(" streaming done");
-  return 0;
-}
+struct tm timeinfo;
 
 void the_streaming_loop(void *pvParameter)
 {
 
-  httpd_req_t *req;
   camera_fb_t *fb = NULL;
   esp_err_t res = ESP_OK;
   size_t _jpg_buf_len = 0;
@@ -2001,142 +1617,22 @@ void the_streaming_loop(void *pvParameter)
 
   long start = millis();
 
-  Serial.print("\n\nlow prio stream_handler task, core ");
+  Serial.print("\n\nlow prio streaming loop, core ");
   Serial.print(xPortGetCoreID());
   Serial.print(", priority = ");
   Serial.println(uxTaskPriorityGet(NULL));
 
-  req = (httpd_req_t *)pvParameter;
+  // req = (httpd_req_t *) pvParameter;
 
   Serial.println("Starting the streaming");
 
-  res = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
-  if (res != ESP_OK)
-  {
-    Serial.printf("after first httpd_resp_set_type %d\n", res);
-    start_streaming = false;
-  }
-
-  int streaming_frames = 0;
-  long streaming_start = millis();
-
   while (true)
   {
-    streaming_frames++;
-
-    if (fb_curr == NULL)
+    if (1 == 1)
     {
-      fb = get_good_jpeg(); // esp_camera_fb_get();
-      if (!fb)
-      {
-        Serial.println("Stream - Camera Capture Failed");
-        start_streaming = false;
-      }
-      framebuffer_len = fb->len;
-      memcpy(framebuffer, fb->buf, fb->len);
-      esp_camera_fb_return(fb);
+      delay(1000);
     }
-    else
-    {
-      fb = fb_curr;
-      framebuffer_len = fb->len;
-      memcpy(framebuffer, fb->buf, fb->len);
-    }
-
-    _jpg_buf_len = framebuffer_len;
-    _jpg_buf = framebuffer;
-
-    size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
-    long send_time = millis();
-
-    res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
-    if (res != ESP_OK)
-    {
-      // Serial.printf("Stream error - 1st send chunk %d\n",res);
-      start_streaming = false;
-    }
-
-    res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
-    if (res != ESP_OK)
-    {
-      // Serial.printf("Stream error - 2nd send chunk %d\n",res);
-      start_streaming = false;
-    }
-
-    res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
-    if (res != ESP_OK)
-    {
-      // Serial.printf("Stream error - 3rd send chunk %d\n", res);
-      start_streaming = false;
-    }
-
-    if (millis() - send_time > stream_delay)
-    {
-      stream_delay = stream_delay * 1.5;
-    }
-
-    time_in_web2 += (millis() - start);
-
-    if (streaming_frames % 100 == 10)
-    {
-      if (Lots_of_Stats)
-        Serial.printf("Streaming at %3.3f fps\n", (float)1000 * streaming_frames / (millis() - streaming_start));
-    }
-
-    delay(stream_delay);
-    start = millis();
-
-    if (start_streaming == false)
-    {
-      Serial.println("Deleting the streaming task");
-      delay(100);
-      vTaskDelete(the_streaming_loop_task);
-    }
-  } // stream forever
-}
-
-void startCameraServer()
-{
-  httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-
-  Serial.print("http task prio: ");
-  Serial.println(config.task_priority);
-
-  httpd_uri_t index_uri = {
-      .uri = "/",
-      .method = HTTP_GET,
-      .handler = index_handler,
-      .user_ctx = NULL};
-  httpd_uri_t capture_uri = {
-      .uri = "/capture",
-      .method = HTTP_GET,
-      .handler = capture_handler,
-      .user_ctx = NULL};
-  httpd_uri_t stream_uri = {
-      .uri = "/stream",
-      .method = HTTP_GET,
-      .handler = stream_handler,
-      .user_ctx = NULL};
-
-  httpd_uri_t photos_uri = {
-      .uri = "/photos",
-      .method = HTTP_GET,
-      .handler = photos_handler,
-      .user_ctx = NULL};
-  if (httpd_start(&camera_httpd, &config) == ESP_OK)
-  {
-    httpd_register_uri_handler(camera_httpd, &index_uri);
-    httpd_register_uri_handler(camera_httpd, &capture_uri);
-    httpd_register_uri_handler(camera_httpd, &stream_uri);
-    httpd_register_uri_handler(camera_httpd, &photos_uri);
   }
-
-  Serial.println("Camera http started");
-}
-
-void stopCameraServer()
-{
-  httpd_stop(camera_httpd);
 }
 
 void the_camera_loop(void *pvParameter);
@@ -2233,7 +1729,6 @@ void setup()
   // Serial.printf("Internal Total heap %d, internal Free Heap %d\n", ESP.getHeapSize(), ESP.getFreeHeap());
   // Serial.printf("SPIRam Total heap   %d, SPIRam Free Heap   %d\n", ESP.getPsramSize(), ESP.getFreePsram());
 
-  Serial.println("Reading the eprom  ...");
   do_eprom_read();
 
   // SD camera init
@@ -2248,8 +1743,22 @@ void setup()
 
   devstr.toCharArray(devname, devstr.length()); // name of your camera for mDNS, Router, and filenames
 
-  Serial.println("Try to get parameters from config.txt ...");
-  read_config_file();
+  String wifiMacString = WiFi.macAddress();
+  // Serial.println(wifiMacString);
+  String idfver = esp_get_idf_version();
+  // Serial.println(esp_get_idf_version());
+
+  String AP_password = idfver.substring(9, 13) + wifiMacString.substring(9, 11) + wifiMacString.substring(15, 17) + "jz60";
+  // Serial.print("AP Password  >>>>"); Serial.print(AP_password); Serial.println("<");
+  String AP_ssid = String(devname) + "_" + wifiMacString.substring(15, 17);
+
+  sprintf(apssid, "%s", AP_ssid.c_str());
+  sprintf(appass, "%s", AP_password.c_str());
+
+  Serial.print(">>>>>>>>>>>>>>>>>>>>> ");
+  Serial.println(apssid);
+  Serial.print(">>>>>>>>>>>>>>>>>>>>> ");
+  Serial.println(appass);
 
   char logname[50];
   sprintf(logname, "/%s%d.999.txt", devname, file_group);
@@ -2260,46 +1769,50 @@ void setup()
   {
     Serial.println("Failed to open logfile for writing");
   }
-  // if (IncludeInternet > 0) {
-  //   Serial.println("Starting the wifi ...");
-  //   init_wifi();
-  //   InternetOff = false;
-  // }
-
+  /*
+    if (IncludeInternet > 0) {
+    Serial.println("Starting the wifi ...");
+    init_wifi();
+    InternetOff = false;
+    } else {
+    Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    Serial.println("You have not wifi - no streamning, no file manager");
+    Serial.println("Put your ssid and password in config.txt on the sd card");
+    Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    }
+  */
   Serial.println("Setting up the camera ...");
   config_camera();
 
   Serial.println("Checking SD for available space ...");
   delete_old_stuff();
+  /*
+    if ( !InternetOff && IncludeInternet == 1) {
+      Serial.printf("Shutting off WiFi now \n\n");
+      delay(1000);
+      WiFi.disconnect();
+      InternetOff = true;
+    }
 
-  digitalWrite(33, HIGH); // red light turns off when setup is complete
-
-  if (!InternetOff && IncludeInternet == 1)
-  {
-    Serial.printf("Shutting off WiFi now \n\n");
-    delay(1000);
-    WiFi.disconnect();
-    InternetOff = true;
-  }
-
-  if (!InternetOff && IncludeInternet > 1)
-  {
-    Serial.println("Starting Web Services ...");
-    startCameraServer();
-  }
-
-  framebuffer = (uint8_t *)ps_malloc(1024 * 1024); // buffer to store a jpg in motion // needs to be larger for big frames from ov5640
+    if ( !InternetOff && IncludeInternet > 1) {
+      Serial.println("Starting Web Services ...");
+      startCameraServer();
+      start_Stream_81_server();
+      start_Stream_82_server();
+    }
+  */
+  framebuffer = (uint8_t *)ps_malloc(512 * 1024);  // buffer to store a jpg in motion // needs to be larger for big frames from ov5640
+  framebuffer2 = (uint8_t *)ps_malloc(512 * 1024); // buffer to store a jpg in motion // needs to be larger for big frames from ov5640
+  framebuffer3 = (uint8_t *)ps_malloc(512 * 1024); // buffer to store a jpg in motion // needs to be larger for big frames from ov5640
 
   Serial.println("Creating the_camera_loop_task");
 
-  wait_for_sd = xSemaphoreCreateMutex();
-  sd_go = xSemaphoreCreateMutex();
+  wait_for_sd = xSemaphoreCreateBinary(); // xSemaphoreCreateMutex();
+  sd_go = xSemaphoreCreateBinary();       // xSemaphoreCreateMutex();
+  baton = xSemaphoreCreateMutex();
 
-  xSemaphoreTake(wait_for_sd, portMAX_DELAY); // will be "given" when sd write is done
-  xSemaphoreTake(sd_go, portMAX_DELAY);       // will be "given" when sd write should start
-
-  // prio 3 - higher than the camera loop(), and the streaming
-  xTaskCreatePinnedToCore(the_camera_loop, "the_camera_loop", 3000, NULL, 3, &the_camera_loop_task, 0); // prio 3, core 0
+  // prio 6 - higher than the camera loop(), and the streaming
+  xTaskCreatePinnedToCore(the_camera_loop, "the_camera_loop", 3000, NULL, 6, &the_camera_loop_task, 0); // prio 3, core 0 //v56 core 1 as http dominating 0 ... back to 0, raise prio
 
   delay(100);
 
@@ -2308,10 +1821,20 @@ void setup()
 
   delay(200);
 
+  xTaskCreatePinnedToCore(the_streaming_loop, "the_streaming_loop", 8000, NULL, 3, &the_streaming_loop_task, 1);
+
+  if (the_streaming_loop_task == NULL)
+  {
+    // vTaskDelete( xHandle );
+    Serial.printf("do_the_steaming_task failed to start! %d\n", the_streaming_loop_task);
+  }
+
   boot_time = millis();
 
   const char *strdate = ctime(&now);
   logfile.println(strdate);
+
+  digitalWrite(33, HIGH); // red light turns off when setup is complete
 
   Serial.println("  End of setup()\n\n");
 }
@@ -2340,11 +1863,12 @@ void the_sd_loop(void *pvParameter)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // the_camera_loop()
+int delete_old_stuff_flag = 0;
 
 void the_camera_loop(void *pvParameter)
 {
 
-  Serial.print("the loop, core ");
+  Serial.print("the camera loop, core ");
   Serial.print(xPortGetCoreID());
   Serial.print(", priority = ");
   Serial.println(uxTaskPriorityGet(NULL));
@@ -2354,7 +1878,7 @@ void the_camera_loop(void *pvParameter)
   start_record_1st_opinion = digitalRead(12);
   start_record = 0;
 
-  delay(500);
+  delay(1000);
 
   while (1)
   {
@@ -2383,7 +1907,7 @@ void the_camera_loop(void *pvParameter)
 
       we_are_already_stopped = 0;
 
-      delete_old_stuff();
+      // delete_old_stuff(); // move to loop
 
       avi_start_time = millis();
       Serial.printf("\nStart the avi ... at %d\n", avi_start_time);
@@ -2402,18 +1926,26 @@ void the_camera_loop(void *pvParameter)
 
       wait_for_cam_start = millis();
       fb_next = get_good_jpeg(); // should take nearly zero time due to time spent writing header
+      // if (framebuffer_time < (millis() - 10)){
+      xSemaphoreTake(baton, portMAX_DELAY);
+      framebuffer_len = fb_next->len;                  // v59.5
+      memcpy(framebuffer, fb_next->buf, fb_next->len); // v59.5
+      framebuffer_time = millis();                     // v59.5
+      xSemaphoreGive(baton);
+      //}
       wait_for_cam += millis() - wait_for_cam_start;
-
       xSemaphoreGive(sd_go); // trigger sd write to write first frame
 
-      digitalWrite(33, frame_cnt % 2); // blink
+      if (blinking)
+        digitalWrite(33, frame_cnt % 2); // blink
 
       ///////////////////  END THE MOVIE //////////////////
     }
-    else if ((frame_cnt > 0 && start_record == 0) || millis() > (avi_start_time + avi_length * 1000))
+    else if (restart_now || reboot_now || (frame_cnt > 0 && start_record == 0) || millis() > (avi_start_time + avi_length * 1000))
     { // end the avi
 
       Serial.println("End the Avi");
+      restart_now = false;
 
       xSemaphoreTake(wait_for_sd, portMAX_DELAY);
       esp_camera_fb_return(fb_curr);
@@ -2424,7 +1956,8 @@ void the_camera_loop(void *pvParameter)
 
       xSemaphoreGive(sd_go); // save final frame of movie
 
-      digitalWrite(33, frame_cnt % 2);
+      if (blinking)
+        digitalWrite(33, frame_cnt % 2);
 
       xSemaphoreTake(wait_for_sd, portMAX_DELAY); // wait for final frame of movie to be written
 
@@ -2433,7 +1966,11 @@ void the_camera_loop(void *pvParameter)
 
       end_avi(); // end the movie
 
-      digitalWrite(33, HIGH); // light off
+      if (blinking)
+        digitalWrite(33, HIGH); // light off
+
+      delete_old_stuff_flag = 1;
+      delay(50);
 
       avi_end_time = millis();
 
@@ -2442,7 +1979,8 @@ void the_camera_loop(void *pvParameter)
       Serial.printf("End the avi at %d.  It was %d frames, %d ms at %.2f fps...\n", millis(), frame_cnt, avi_end_time, avi_end_time - avi_start_time, fps);
       logfile.printf("End the avi at %d.  It was %d frames, %d ms at %.2f fps...\n", millis(), frame_cnt, avi_end_time, avi_end_time - avi_start_time, fps);
 
-      frame_cnt = 0; // start recording again on the next loop
+      if (!reboot_now)
+        frame_cnt = 0; // start recording again on the next loop
 
       ///////////////////  ANOTHER FRAME  //////////////////
     }
@@ -2472,9 +2010,17 @@ void the_camera_loop(void *pvParameter)
 
       long wait_for_cam_start = millis();
       fb_next = get_good_jpeg(); // should take near zero, unless the sd is faster than the camera, when we will have to wait for the camera
+      // if (framebuffer_time < (millis() - 10)){
+      xSemaphoreTake(baton, portMAX_DELAY);
+      framebuffer_len = fb_next->len;                  // v59.5
+      memcpy(framebuffer, fb_next->buf, fb_next->len); // v59.5
+      framebuffer_time = millis();                     // v59.5
+      xSemaphoreGive(baton);
+      //}
       wait_for_cam += millis() - wait_for_cam_start;
 
-      digitalWrite(33, frame_cnt % 2);
+      if (blinking)
+        digitalWrite(33, frame_cnt % 2);
 
       if (frame_cnt % 100 == 10)
       { // print some status every 100 frames
@@ -2491,7 +2037,7 @@ void the_camera_loop(void *pvParameter)
           most_recent_fps = 100.0 / ((millis() - time_before_last_100_frames) / 1000.0);
           most_recent_avg_framesize = (movi_size - bytes_before_last_100_frames) / 100;
 
-          if (Lots_of_Stats)
+          if (Lots_of_Stats && frame_cnt < 1011)
           {
             Serial.printf("So far: %04d frames, in %6.1f seconds, for last 100 frames: avg frame size %6.1f kb, %.2f fps ...\n", frame_cnt, 0.001 * (millis() - avi_start_time), 1.0 / 1024 * most_recent_avg_framesize, most_recent_fps);
             logfile.printf("So far: %04d frames, in %6.1f seconds, for last 100 frames: avg frame size %6.1f kb, %.2f fps ...\n", frame_cnt, 0.001 * (millis() - avi_start_time), 1.0 / 1024 * most_recent_avg_framesize, most_recent_fps);
@@ -2511,10 +2057,18 @@ void the_camera_loop(void *pvParameter)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // loop() - loop runs at low prio, so I had to move it to the task the_camera_loop at higher priority
 
+long wakeup;
+long last_wakeup = 0;
+
 void loop()
 {
   long run_time = millis() - boot_time;
 
+  if (delete_old_stuff_flag == 1)
+  {
+    delete_old_stuff_flag = 0;
+    delete_old_stuff();
+  }
   start_record_2nd_opinion = start_record_1st_opinion;
   start_record_1st_opinion = digitalRead(12);
 
@@ -2526,44 +2080,11 @@ void loop()
       start_record = 0;
   }
 
-  int read13 = digitalRead(13);
-  delay(20);
-  read13 = read13 + digitalRead(13); // get 2 opinions to help poor soldering
-
-  if (IncludeInternet == 4)
-  { // 4 is oppoiste of 3, so, flip read13
-    if (read13 > 0)
-    {
-      read13 = 0;
-    }
-    else
-    {
-      read13 = 2;
-    }
-  }
-
-  // if (IncludeInternet > 1) {
-  //   if (read13 == 2 && !InternetOff) {
-  //     Serial.println("Shutting off wifi ..."); logfile.println("Shutting off wifi ...");
-  //     stopCameraServer();
-  //     WiFiManager wm;
-  //     wm.disconnect();
-  //     InternetOff = true;
-  //   }
-  //   if (read13 == 0 && InternetOff) {
-  //     Serial.println("Starting the wifi ...");  logfile.println("Starting the wifi ...");
-  //     init_wifi();
-  //     Serial.println("Starting Web Services ...");
-  //     startCameraServer();
-  //     InternetOff = false;
-  //   }
-  // }
-
   if (reboot_now == true)
   {
+    Serial.println(" \n\n\n Rebooting ... \n\n\n");
     delay(2000);
-    major_fail();
+    ESP.restart();
   }
-
   delay(200);
 }

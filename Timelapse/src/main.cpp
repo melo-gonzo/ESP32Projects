@@ -156,12 +156,6 @@ void takePhoto(String filename)
     Serial.println("Saving " + filename);
     file.write(fb->buf, fb->len);
     file.close();
-
-    // Momentarily blink the flash
-    // digitalWrite(FLASH_PIN, HIGH);
-    // delay(100);
-    // digitalWrite(FLASH_PIN, LOW);
-    // delay(500);
   }
   else
   {
