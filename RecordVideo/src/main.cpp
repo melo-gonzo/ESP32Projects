@@ -1,102 +1,7 @@
 /*
-
-  ESP32-CAM-Video-Recorder-junior
-
-  This program records an mjpeg avi video to the sd card of an ESP32-CAM.
-
-
-  It is the junior version of   https://github.com/jameszah/ESP32-CAM-Video-Recorder
-  which has 100 other features of wifi, streaming video, http control, telegram updates, pir control,
-  touch control, ftp downloads, .... and other things that make it very big and complex.
-
-  Just set a few parameters, compile and download, and it will record on power-on, until sd is full, or power-off.
-  Then pull out the sd and move it to your computer, and you will see all but the last file avi which died during the unplug.
-
-  The files will have the name such as:
-
-    desklens10.003.avi
-
-    "desklens" is your devname
-    10 - is a number stored in eprom that will increase everytime your device boots
-    3 - is the 3rd file created during the current boot
-
-  Small red led on the back blinks with every frame.
-
-
-  by James Zahary Sep 12, 2020
-     jamzah.plc@gmail.com
-
-   - v50 apr 13, 2021 - tidy
-   - v50lpmod apr 28, 2021 - shut off low power modem
-   - v53 jul 8, 2021 - get rid on no wifi message cloggoing up log file
-   - v56 dec 23, 2021 - tzchar to 60 bytes
-                      - add esp32 sd filemanager to download files
-   - v57 dec 28, 2021 - final changes to https://github.com/jameszah/ESPxWebFlMgr/tree/master/esp32_sd_file_manager
-   - v58 dec 30, 2021 - changes for Arduino 1.8.19 and esp32 Board Library 2.0.2
-         jan 12, 2022 - add dates to file manager
-                      - add simple version of config.txt configuration
-   - 58.9 apr 29,2022 - re-connect wifi after failure
-                      - correct mdns for wifiman configuration
-                      - CAMERA_GRAB_LATEST
-                      - enable streaming faster than recording
-    -v59.0 may 8,2022 - host mode as an option for wifi
-    -v59.3 may 17,2022 - time to camera in ap moce
-    -v59.4 may 18,2022 - miltiple photo function, defualt to ap after ssid fails
-    -v59.5 may 19, 2022 - improve streaming speed
-                        - drop CAMERA_GRAB_LATEST for speed
-    -v60.4 jun 15,2022 - two channels of streaming on port 821 and 82 to kept webpage working on port 80
-                       - file manager still on 8080
-                       - tidy up web page
-                       - assume a better frame rate if reboot during recording and no index is written
-                       - start wifi after the recording starts to sped things up
-     60.4.5  - semaphore and framebuffer2/3 when using capture sytle video streaming
-             - wifi dns reset
-          .6  - repeat dns every 5 minutes
-          .7  - every 15
-
-  https://github.com/jameszah/ESP32-CAM-Video-Recorder-junior
-
-    jameszah/ESP32-CAM-Video-Recorder-junior is licensed under the
-    GNU General Public License v3.0
-
-  The is Arduino code, with standard setup for ESP32-CAM
-    - Board ESP32 Wrover Module
-    - Partition Scheme Huge APP (3MB No OTA)
-    - or with AI Thinker ESP32-CAM
-
-  Needs these libraries or better:
-
-
-  Compiled with Arduino 1.8.19, and esp32-arduino core version 2.0.4, on Sep 13, 2022
-
-Linking everything together...
-"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r2-patch3/bin/xtensa-esp32-elf-g++" "-Wl,--Map=C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.map" "-LC:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/sdk/esp32/lib" "-LC:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/sdk/esp32/ld" "-LC:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/sdk/esp32/qio_qspi" -T esp32.rom.redefined.ld -T memory.ld -T sections.ld -T esp32.rom.ld -T esp32.rom.api.ld -T esp32.rom.libgcc.ld -T esp32.rom.newlib-data.ld -T esp32.rom.syscalls.ld -T esp32.peripherals.ld -mlongcalls -Wno-frame-address -Wl,--cref -Wl,--gc-sections -fno-rtti -fno-lto -u ld_include_hli_vectors_bt -u _Z5setupv -u _Z4loopv -u esp_app_desc -u pthread_include_pthread_impl -u pthread_include_pthread_cond_impl -u pthread_include_pthread_local_storage_impl -u pthread_include_pthread_rwlock_impl -u include_esp_phy_override -u ld_include_highint_hdl -u start_app -u start_app_other_cores -u __ubsan_include -Wl,--wrap=longjmp -u __assert_func -u vfs_include_syscalls_impl -Wl,--undefined=uxTopUsedPriority -u app_main -u newlib_include_heap_impl -u newlib_include_syscalls_impl -u newlib_include_pthread_impl -u newlib_include_assert_impl -u __cxa_guard_dummy -DESP32 -DCORE_DEBUG_LEVEL=0 -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue -mfix-esp32-psram-cache-strategy=memw -DARDUINO_USB_CDC_ON_BOOT=0 -Wl,--start-group "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\sketch\\CRC32.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\sketch\\ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\sketch\\ESPxWebFlMgr.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\FS\\FS.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\FS\\vfs_api.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\SD_MMC\\SD_MMC.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\EEPROM\\EEPROM.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFi.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiAP.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiClient.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiGeneric.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiMulti.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiSTA.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiScan.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiServer.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFi\\WiFiUdp.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\ESPmDNS\\ESPmDNS.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WebServer\\Parsing.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WebServer\\WebServer.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WebServer\\detail\\mimetable.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\HTTPClient\\HTTPClient.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFiClientSecure\\esp_crt_bundle.c.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFiClientSecure\\WiFiClientSecure.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\libraries\\WiFiClientSecure\\ssl_client.cpp.o" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913\\core\\core.a" -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lasio -lbt -lcbor -lunity -lcmock -lcoap -lnghttp -lesp-tls -lesp_adc_cal -lesp_hid -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lesp_https_server -lesp_lcd -lprotobuf-c -lprotocomm -lmdns -lesp_local_ctrl -lsdmmc -lesp_serial_slave_link -lesp_websocket_client -lexpat -lwear_levelling -lfatfs -lfreemodbus -ljsmn -ljson -llibsodium -lmqtt -lopenssl -lperfmon -lspiffs -lulp -lwifi_provisioning -lbutton -lrmaker_common -ljson_parser -ljson_generator -lesp_schedule -lesp_rainmaker -lqrcode -lws2812_led -lesp-dsp -lesp-sr -lesp32-camera -lesp_littlefs -lfb_gfx -lasio -lcbor -lcmock -lunity -lcoap -lesp_lcd -lesp_websocket_client -lexpat -lfreemodbus -ljsmn -llibsodium -lperfmon -lesp_adc_cal -lesp_hid -lfatfs -lwear_levelling -lopenssl -lesp_rainmaker -lesp_local_ctrl -lesp_https_server -lwifi_provisioning -lprotocomm -lbt -lbtdm_app -lprotobuf-c -lmdns -lrmaker_common -lmqtt -ljson_parser -ljson_generator -lesp_schedule -lqrcode -lcat_face_detect -lhuman_face_detect -lcolor_detect -lmfn -ldl -lwakenet -lmultinet -lesp_audio_processor -lesp_audio_front_end -lesp-sr -lwakenet -lmultinet -lesp_audio_processor -lesp_audio_front_end -ljson -lspiffs -ldl_lib -lc_speech_features -lhilexin_wn5 -lhilexin_wn5X2 -lhilexin_wn5X3 -lnihaoxiaozhi_wn5 -lnihaoxiaozhi_wn5X2 -lnihaoxiaozhi_wn5X3 -lnihaoxiaoxin_wn5X3 -lcustomized_word_wn5 -lmultinet2_ch -lesp_tts_chinese -lvoice_set_xiaole -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lesp_ringbuf -lefuse -lesp_ipc -ldriver -lesp_pm -lmbedtls -lapp_update -lbootloader_support -lspi_flash -lnvs_flash -lpthread -lesp_gdbstub -lespcoredump -lesp_phy -lesp_system -lesp_rom -lhal -lvfs -lesp_eth -ltcpip_adapter -lesp_netif -lesp_event -lwpa_supplicant -lesp_wifi -lconsole -llwip -llog -lheap -lsoc -lesp_hw_support -lxtensa -lesp_common -lesp_timer -lfreertos -lnewlib -lcxx -lapp_trace -lnghttp -lesp-tls -ltcp_transport -lesp_http_client -lesp_http_server -lesp_https_ota -lsdmmc -lesp_serial_slave_link -lulp -lmbedtls_2 -lmbedcrypto -lmbedx509 -lcoexist -lcore -lespnow -lmesh -lnet80211 -lpp -lsmartconfig -lwapi -lphy -lrtc -lesp_phy -lphy -lrtc -lesp_phy -lphy -lrtc -lxt_hal -lm -lnewlib -lstdc++ -lpthread -lgcc -lcxx -lapp_trace -lgcov -lapp_trace -lgcov -lc -Wl,--end-group -Wl,-EL -o "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.elf"
-"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\tools\\esptool_py\\3.3.0/esptool.exe" --chip esp32 elf2image --flash_mode dio --flash_freq 80m --flash_size 4MB -o "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.bin" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.elf"
-esptool.py v3.3
-Creating esp32 image...
-Merged 25 ELF sections
-Successfully created esp32 image.
-"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\hardware\\esp32\\2.0.4/tools/gen_esp32part.exe" -q "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/partitions.csv" "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.partitions.bin"
-Multiple libraries were found for "WiFi.h"
- Used: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WiFi
- Not used: C:\ArduinoPortable\arduino-1.8.19\libraries\WiFi
-Using library FS at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\FS
-Using library SD_MMC at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\SD_MMC
-Using library EEPROM at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\EEPROM
-Using library WiFi at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WiFi
-Using library ESPmDNS at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\ESPmDNS
-Using library WebServer at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WebServer
-Using library HTTPClient at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\HTTPClient
-Using library WiFiClientSecure at version 2.0.0 in folder: C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.4\libraries\WiFiClientSecure
-"C:\\ArduinoPortable\\arduino-1.8.19\\portable\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r2-patch3/bin/xtensa-esp32-elf-size" -A "C:\\Users\\James\\AppData\\Local\\Temp\\arduino_build_639913/ESP32-CAM-Video-Recorder-junior-60x.4.7.ino.elf"
-Sketch uses 1033573 bytes (32%) of program storage space. Maximum is 3145728 bytes.
-Global variables use 59164 bytes (18%) of dynamic memory, leaving 268516 bytes for local variables. Maximum is 327680 bytes.
-
-
-
+Refactor of: https://tinyurl.com/bdeatzvz
 */
 
-//#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include "Arduino.h"
 #include "esp_log.h"
 #include "esp_http_server.h"
@@ -106,17 +11,11 @@ Global variables use 59164 bytes (18%) of dynamic memory, leaving 268516 bytes f
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // user edits here:
 
-static const char vernum[] = "v60.4.7";
+static const char vernum[] = "v0.1";
 char devname[30];
 String devstr = "ccam";
 
-int IncludeInternet = 0; // 0 for no internet, 1 for time only, 2  WiFiMan, 3 ssid in file, 4 ssid in file default off, 5 host mode
 
-const char *ssid = "jzjzjz";
-
-// https://sites.google.com/a/usapiens.com/opnode/time-zones  -- find your timezone here
-String TIMEZONE = "GMT0BST,M3.5.0/01,M10.5.0/02";
-// String TIMEZONE = "MST7MDT,M3.2.0/2:00:00,M11.1.0/2:00:00";
 #define Lots_of_Stats 1
 #define blinking 0
 
@@ -137,11 +36,7 @@ bool configfile = false;
 bool InternetOff = true;
 bool reboot_now = false;
 bool restart_now = false;
-String cssid;
-String cpass;
 String czone;
-char apssid[30];
-char appass[14];
 
 TaskHandle_t the_camera_loop_task;
 TaskHandle_t the_sd_loop_task;
@@ -1582,25 +1477,6 @@ static void end_avi()
 // Time
 #include "time.h"
 
-// Workaround for the WebServer.h vs esp_http_server.h problem  https://github.com/tzapu/WiFiManager/issues/1184
-/*
-  #define _HTTP_Method_H_
-
-  typedef enum {
-  jHTTP_GET     = 0b00000001,
-  jHTTP_POST    = 0b00000010,
-  jHTTP_DELETE  = 0b00000100,
-  jHTTP_PUT     = 0b00001000,
-  jHTTP_PATCH   = 0b00010000,
-  jHTTP_HEAD    = 0b00100000,
-  jHTTP_OPTIONS = 0b01000000,
-  jHTTP_ANY     = 0b01111111,
-  } HTTPMethod;
-*/
-//#include "C:\ArduinoPortable\arduino-1.8.19\portable\packages\esp32\hardware\esp32\2.0.3\libraries\WiFi\src\WiFi.h"
-#include "WiFi.h"
-//#include "C:\ArduinoPortable\sketch\libraries\WiFiManager\WiFiManager.h"
-//#include "WiFiManager.h"
 #include "ESPmDNS.h"
 
 time_t now;
@@ -1622,16 +1498,11 @@ void the_streaming_loop(void *pvParameter)
   Serial.print(", priority = ");
   Serial.println(uxTaskPriorityGet(NULL));
 
-  // req = (httpd_req_t *) pvParameter;
-
   Serial.println("Starting the streaming");
 
   while (true)
   {
-    if (1 == 1)
-    {
       delay(1000);
-    }
   }
 }
 
@@ -1661,7 +1532,7 @@ void setup()
 
   Serial.println("                                    ");
   Serial.println("-------------------------------------");
-  Serial.printf("ESP32-CAM-Video-Recorder-junior %s\n", vernum);
+  Serial.printf("Record Video: %s\n", vernum);
   Serial.println("-------------------------------------");
 
   Serial.print("setup, core ");
@@ -1726,9 +1597,6 @@ void setup()
     break;
   }
 
-  // Serial.printf("Internal Total heap %d, internal Free Heap %d\n", ESP.getHeapSize(), ESP.getFreeHeap());
-  // Serial.printf("SPIRam Total heap   %d, SPIRam Free Heap   %d\n", ESP.getPsramSize(), ESP.getFreePsram());
-
   do_eprom_read();
 
   // SD camera init
@@ -1743,22 +1611,8 @@ void setup()
 
   devstr.toCharArray(devname, devstr.length()); // name of your camera for mDNS, Router, and filenames
 
-  String wifiMacString = WiFi.macAddress();
-  // Serial.println(wifiMacString);
   String idfver = esp_get_idf_version();
-  // Serial.println(esp_get_idf_version());
 
-  String AP_password = idfver.substring(9, 13) + wifiMacString.substring(9, 11) + wifiMacString.substring(15, 17) + "jz60";
-  // Serial.print("AP Password  >>>>"); Serial.print(AP_password); Serial.println("<");
-  String AP_ssid = String(devname) + "_" + wifiMacString.substring(15, 17);
-
-  sprintf(apssid, "%s", AP_ssid.c_str());
-  sprintf(appass, "%s", AP_password.c_str());
-
-  Serial.print(">>>>>>>>>>>>>>>>>>>>> ");
-  Serial.println(apssid);
-  Serial.print(">>>>>>>>>>>>>>>>>>>>> ");
-  Serial.println(appass);
 
   char logname[50];
   sprintf(logname, "/%s%d.999.txt", devname, file_group);
@@ -1769,38 +1623,13 @@ void setup()
   {
     Serial.println("Failed to open logfile for writing");
   }
-  /*
-    if (IncludeInternet > 0) {
-    Serial.println("Starting the wifi ...");
-    init_wifi();
-    InternetOff = false;
-    } else {
-    Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    Serial.println("You have not wifi - no streamning, no file manager");
-    Serial.println("Put your ssid and password in config.txt on the sd card");
-    Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    }
-  */
+
   Serial.println("Setting up the camera ...");
   config_camera();
 
   Serial.println("Checking SD for available space ...");
   delete_old_stuff();
-  /*
-    if ( !InternetOff && IncludeInternet == 1) {
-      Serial.printf("Shutting off WiFi now \n\n");
-      delay(1000);
-      WiFi.disconnect();
-      InternetOff = true;
-    }
 
-    if ( !InternetOff && IncludeInternet > 1) {
-      Serial.println("Starting Web Services ...");
-      startCameraServer();
-      start_Stream_81_server();
-      start_Stream_82_server();
-    }
-  */
   framebuffer = (uint8_t *)ps_malloc(512 * 1024);  // buffer to store a jpg in motion // needs to be larger for big frames from ov5640
   framebuffer2 = (uint8_t *)ps_malloc(512 * 1024); // buffer to store a jpg in motion // needs to be larger for big frames from ov5640
   framebuffer3 = (uint8_t *)ps_malloc(512 * 1024); // buffer to store a jpg in motion // needs to be larger for big frames from ov5640
