@@ -61,9 +61,9 @@ void setup()
 	config.pin_reset = RESET_GPIO_NUM;
 	config.xclk_freq_hz = 20000000;
 	config.pixel_format = PIXFORMAT_JPEG;
-	config.frame_size = FRAMESIZE_QVGA;
+	config.frame_size = FRAMESIZE_SVGA;
 	config.jpeg_quality = 10; // 0-63 lower number means higher quality
-	config.fb_count = 1;
+	config.fb_count = 2;
 	// FRAMESIZE_QVGA (320 x 240)
 	// FRAMESIZE_CIF (352 x 288)
 	// FRAMESIZE_VGA (640 x 480)
