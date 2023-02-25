@@ -24,11 +24,11 @@ int quality = 12;
 int framesizeconfig = FRAMESIZE_UXGA;
 int qualityconfig = 5;
 int buffersconfig = 3;
-int avi_length = 30;   // how long a movie in seconds -- 1800 sec = 30 min
+int avi_length = 600;   // how long a movie in seconds -- 1800 sec = 30 min
 int frame_interval = 0;  // record at full speed
 int speed_up_factor = 1; // play at realtime
 int stream_delay = 500;  // minimum of 500 ms delay between frames
-int MagicNumber = 12;    // change this number to reset the eprom in your esp32 for file numbers
+int MagicNumber = 6;    // change this number to reset the eprom in your esp32 for file numbers
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

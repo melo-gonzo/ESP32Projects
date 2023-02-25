@@ -97,8 +97,9 @@ void setup()
 	if (WiFi.status() == WL_CONNECTED)
 	{
 		Serial.print("Stream Link: rtsp://");
-		Serial.println(WiFi.localIP());
-		Serial.println(":8554/mjpeg/1\n");
+		Serial.print(WiFi.localIP());
+		Serial.print(":8554/mjpeg/1\n");
+		
 	}
 	server.begin();
 	initRTSP();

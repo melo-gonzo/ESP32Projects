@@ -62,14 +62,28 @@ void setup() {
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
-  config.frame_size = FRAMESIZE_UXGA;
+  config.frame_size = FRAMESIZE_HD;
   config.pixel_format = PIXFORMAT_JPEG; // for streaming
   //config.pixel_format = PIXFORMAT_RGB565; // for face detection/recognition
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.jpeg_quality = 12;
-  config.fb_count = 1;
-  
+  config.fb_count = 2;
+  // FRAMESIZE_96X96,    // 96x96
+  // FRAMESIZE_QQVGA,    // 160x120
+  // FRAMESIZE_QCIF,     // 176x144
+  // FRAMESIZE_HQVGA,    // 240x176
+  // FRAMESIZE_240X240,  // 240x240
+  // FRAMESIZE_QVGA,     // 320x240   
+  // FRAMESIZE_CIF,      // 400x296       
+  // FRAMESIZE_HVGA,     // 480x320       
+  // FRAMESIZE_VGA,      // 640x480   
+  // FRAMESIZE_SVGA,     // 800x600                      
+  // FRAMESIZE_XGA,      // 1024x768  
+  // FRAMESIZE_HD,       // 1280x720  
+  // FRAMESIZE_SXGA,     // 1280x1024 
+  // FRAMESIZE_UXGA,     // 1600x1200 
+
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
   if(config.pixel_format == PIXFORMAT_JPEG){
@@ -111,7 +125,7 @@ void setup() {
   }
   // drop down frame size for higher initial frame rate
   if(config.pixel_format == PIXFORMAT_JPEG){
-    s->set_framesize(s, FRAMESIZE_QVGA);
+    s->set_framesize(s, FRAMESIZE_HD);
   }
 
 #if defined(CAMERA_MODEL_M5STACK_WIDE) || defined(CAMERA_MODEL_M5STACK_ESP32CAM)
