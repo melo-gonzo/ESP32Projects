@@ -441,9 +441,6 @@ void setup() {
     ESP.restart();
   }
 
-  //  Configure and connect to WiFi
-  // IPAddress ip;
-
   // Set your Static IP address
   IPAddress local_IP(192, 168, 1, 68);
   // Set your Gateway IP address
