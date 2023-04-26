@@ -9,6 +9,7 @@
 #include "soc/rtc_cntl_reg.h" //disable brownout problems
 #include "soc/soc.h"          //disable brownout problems
 #include <WiFi.h>
+#include <time.h>
 
 // Replace with your network credentials
 #include "wifikeys.h"
@@ -18,7 +19,7 @@
 // This project was only tested with the AI Thinker Model
 #define CAMERA_MODEL_AI_THINKER
 
-#define FRAME_INTERVAL_MS 1000 
+#define FRAME_INTERVAL_MS 1000
 uint32_t last_fps_time = 0;
 uint32_t frame_count = 0;
 float fps = 0.0;
@@ -64,13 +65,45 @@ static esp_err_t stream_handler(httpd_req_t *req) {
   }
 
   while (true) {
-    uint32_t now = millis();
+    uint32_t now_fps = millis();
     fb = esp_camera_fb_get();
+    /////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    Serial.println("Starting Algo");
+    time_t now;
+    struct tm timeinfo;
+    time(&now);
+    localtime_r(&now, &timeinfo);
+
+    char timestamp_str[32];
+    strftime(timestamp_str, sizeof(timestamp_str), "%Y-%m-%d %H:%M:%S",
+             &timeinfo);
+
+    uint8_t *framebuffer = fb->buf;
+    int linesize = fb->width * 2;
+
+    // Add timestamp to the top-left corner of the frame
+    int timestamp_x = 10;
+    int timestamp_y = 10;
+    int timestamp_len = strlen(timestamp_str);
+    for (int y = timestamp_y; y < (timestamp_y + 10); y++) {
+      uint8_t *lineptr = framebuffer + (y * linesize) + (timestamp_x * 2);
+      for (int x = 0; x < (timestamp_len * 10); x++) {
+        int offset = (x % 10) < 8 ? 1 : 0;
+        lineptr[(x * 2) + offset] = 0xFF;
+      }
+    }
+    Serial.println("Ending Algo");
+    /////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+
     frame_count++;
-    if (now - last_fps_time >= FRAME_INTERVAL_MS) {
-      fps = (float)frame_count / ((float)(now - last_fps_time) / 1000.0);
+    if (now_fps - last_fps_time >= FRAME_INTERVAL_MS) {
+      fps = (float)frame_count / ((float)(now_fps - last_fps_time) / 1000.0);
       Serial.printf("FPS: %.2f\n", fps);
-      last_fps_time = now;
+      last_fps_time = now_fps;
       frame_count = 0;
     }
     if (!fb) {
@@ -79,7 +112,7 @@ static esp_err_t stream_handler(httpd_req_t *req) {
     } else {
       if (fb->width > 400) {
         if (fb->format != PIXFORMAT_JPEG) {
-          bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+          bool jpeg_converted = frame2jpg(fb, 100, &_jpg_buf, &_jpg_buf_len);
           esp_camera_fb_return(fb);
           fb = NULL;
           if (!jpeg_converted) {
@@ -161,9 +194,23 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 8000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_SVGA;
+  config.frame_size = FRAMESIZE_QVGA;
   config.jpeg_quality = 10;
   config.fb_count = 2;
+  // FRAMESIZE_96X96,    // 96x96
+  // FRAMESIZE_QQVGA,    // 160x120
+  // FRAMESIZE_QCIF,     // 176x144
+  // FRAMESIZE_HQVGA,    // 240x176
+  // FRAMESIZE_240X240,  // 240x240
+  // FRAMESIZE_QVGA,     // 320x240
+  // FRAMESIZE_CIF,      // 400x296
+  // FRAMESIZE_HVGA,     // 480x320
+  // FRAMESIZE_VGA,      // 640x480
+  // FRAMESIZE_SVGA,     // 800x600
+  // FRAMESIZE_XGA,      // 1024x768
+  // FRAMESIZE_HD,       // 1280x720
+  // FRAMESIZE_SXGA,     // 1280x1024
+  // FRAMESIZE_UXGA,     // 1600x1200
 
   // Camera init
   esp_err_t err = esp_camera_init(&config);

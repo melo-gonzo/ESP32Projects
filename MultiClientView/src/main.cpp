@@ -36,28 +36,12 @@
 #include <esp_wifi.h>
 
 // Select camera model
-// #define CAMERA_MODEL_WROVER_KIT
-// #define CAMERA_MODEL_ESP_EYE
-// #define CAMERA_MODEL_M5STACK_PSRAM
-// #define CAMERA_MODEL_M5STACK_WIDE
 #define CAMERA_MODEL_AI_THINKER
 
 #include "camera_pins.h"
 
-/*
-  Next one is an include with wifi credentials.
-  This is what you need to do:
+void startCameraServer();
 
-  1. Create a file called "home_wifi_multi.h" in the same folder   OR   under a
-  separate subfolder of the "libraries" folder of Arduino IDE. (You are creating
-  a "fake" library really - I called it "MySettings").
-  2. Place the following text in the file:
-  #define SSID1 "replace with your wifi ssid"
-  #define PWD1 "replace your wifi password"
-  3. Save.
-
-  Should work then
-*/
 #include "wifikeys.h"
 
 OV2640 cam;
@@ -79,7 +63,7 @@ SemaphoreHandle_t frameSync = NULL;
 QueueHandle_t streamingClients;
 
 // We will try to achieve 25 FPS frame rate
-const int FPS = 5;
+const int FPS = 30;
 
 // We will handle web client requests every 50 ms (20 Hz)
 const int WSINTERVAL = 100;
@@ -158,6 +142,7 @@ void camCB(void *pvParameters) {
 
     //  Copy current frame into local buffer
     char *b = (char *)cam.getfb();
+
     memcpy(fbs[ifb], b, s);
 
     //  Let other tasks run and wait until the end of the current frame rate
@@ -407,13 +392,13 @@ void setup() {
   config.pin_sscb_scl = SIOC_GPIO_NUM;
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 20000000;
-  config.frame_size = FRAMESIZE_UXGA;
+  config.xclk_freq_hz = 8000000;
+  config.frame_size = FRAMESIZE_HD;
   config.pixel_format = PIXFORMAT_JPEG; // for streaming
   // config.pixel_format = PIXFORMAT_RGB565; // for face detection/recognition
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 12;
+  config.jpeg_quality = 6;
   config.fb_count = 2;
   // FRAMESIZE_96X96,    // 96x96
   // FRAMESIZE_QQVGA,    // 160x120
@@ -441,11 +426,23 @@ void setup() {
     ESP.restart();
   }
 
+  sensor_t *s = esp_camera_sensor_get();
+  // 64 Module: Nothing == horizontal
+  // s->set_vflip(s, 1);
+
+  //// 68 Module Vertical
+  // s->set_hmirror(s, 0);
+  // s->set_vflip(s, 0);
+
+  //// Wide Angle
+  // s->set_hmirror(s, 1);
+  // s->set_vflip(s, 1);
+
   // Set your Static IP address
-  IPAddress local_IP(192, 168, 1, 68);
+  IPAddress local_IP(192, 168, 1, 66);
   // Set your Gateway IP address
   IPAddress gateway(192, 168, 1, 1);
-  IPAddress subnet(255, 255, 0, 0);
+  IPAddress subnet(255, 255, 255, 0);
   IPAddress primaryDNS(8, 8, 8, 8);   // optional
   IPAddress secondaryDNS(8, 8, 4, 4); // optional
 
@@ -453,7 +450,6 @@ void setup() {
     Serial.println("STA Failed to configure");
   }
   WiFi.begin(ssid, password);
-
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
@@ -464,9 +460,10 @@ void setup() {
   // ip = WiFi.localIP();
   Serial.println(F("WiFi connected"));
   Serial.println("");
-  Serial.print("Stream Link: http://192.168.1.68");
-  // Serial.print(ip);
+  Serial.print("Stream Link: ");
+  Serial.print(local_IP);
   Serial.println("/mjpeg/1");
+  startCameraServer();
 
   // Start mainstreaming RTOS task
   xTaskCreatePinnedToCore(mjpegCB, "mjpeg", 4 * 1024, NULL, 2, &tMjpeg,

@@ -20,7 +20,7 @@
 #include <SD_MMC.h>
 #include "esp_camera.h"
 
-#define MINUTES_BETWEEN_PHOTOS 10
+#define MINUTES_BETWEEN_PHOTOS 1
 
 // Pins for ESP32-CAM
 
@@ -98,11 +98,26 @@ bool startCamera()
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
 
+  // FRAMESIZE_96X96,    // 96x96
+  // FRAMESIZE_QQVGA,    // 160x120
+  // FRAMESIZE_QCIF,     // 176x144
+  // FRAMESIZE_HQVGA,    // 240x176
+  // FRAMESIZE_240X240,  // 240x240
+  // FRAMESIZE_QVGA,     // 320x240
+  // FRAMESIZE_CIF,      // 400x296
+  // FRAMESIZE_HVGA,     // 480x320
+  // FRAMESIZE_VGA,      // 640x480
+  // FRAMESIZE_SVGA,     // 800x600
+  // FRAMESIZE_XGA,      // 1024x768
+  // FRAMESIZE_HD,       // 1280x720
+  // FRAMESIZE_SXGA,     // 1280x1024
+  // FRAMESIZE_UXGA,     // 1600x1200
+
   // Set resolution based on whether we have extra memory
   if (psramFound())
   {
     Serial.println("PSRAM found. Maximum XGA resolution supported.");
-    config.frame_size = FRAMESIZE_XGA;
+    config.frame_size = FRAMESIZE_HD;
     config.jpeg_quality = 10;
     config.fb_count = 2;
   }
