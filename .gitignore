@@ -7,3 +7,5 @@
 *ArduinoIDE*
 *.DS_Store*
 ESP32-RTSP/.gitignore
+*src_copy*
+*notes.md*

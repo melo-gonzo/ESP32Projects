@@ -37,6 +37,8 @@
 
 // Select camera model
 #define CAMERA_MODEL_AI_THINKER
+// #define CAMERA_MODEL_XIAO_ESP32S3 // Has PSRAM
+
 
 #include "camera_pins.h"
 
@@ -373,6 +375,25 @@ void setup() {
   delay(1000); // wait for a second to let Serial connect
 
   // Configure the camera
+  // camera_config_t config;
+  // config.ledc_channel = LEDC_CHANNEL_0;
+  // config.ledc_timer = LEDC_TIMER_0;
+  // config.pin_d0 = Y2_GPIO_NUM;
+  // config.pin_d1 = Y3_GPIO_NUM;
+  // config.pin_d2 = Y4_GPIO_NUM;
+  // config.pin_d3 = Y5_GPIO_NUM;
+  // config.pin_d4 = Y6_GPIO_NUM;
+  // config.pin_d5 = Y7_GPIO_NUM;
+  // config.pin_d6 = Y8_GPIO_NUM;
+  // config.pin_d7 = Y9_GPIO_NUM;
+  // config.pin_xclk = XCLK_GPIO_NUM;
+  // config.pin_pclk = PCLK_GPIO_NUM;
+  // config.pin_vsync = VSYNC_GPIO_NUM;
+  // config.pin_href = HREF_GPIO_NUM;
+  // config.pin_sscb_sda = SIOD_GPIO_NUM;
+  // config.pin_sscb_scl = SIOC_GPIO_NUM;
+  // config.pin_pwdn = PWDN_GPIO_NUM;
+  // config.pin_reset = RESET_GPIO_NUM;
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -393,12 +414,12 @@ void setup() {
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 8000000;
-  config.frame_size = FRAMESIZE_HD;
+  config.frame_size = FRAMESIZE_VGA;
   config.pixel_format = PIXFORMAT_JPEG; // for streaming
   // config.pixel_format = PIXFORMAT_RGB565; // for face detection/recognition
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 6;
+  config.jpeg_quality = 10;
   config.fb_count = 2;
   // FRAMESIZE_96X96,    // 96x96
   // FRAMESIZE_QQVGA,    // 160x120
@@ -427,16 +448,8 @@ void setup() {
   }
 
   sensor_t *s = esp_camera_sensor_get();
-  // 64 Module: Nothing == horizontal
-  // s->set_vflip(s, 1);
-
-  //// 68 Module Vertical
   // s->set_hmirror(s, 0);
   // s->set_vflip(s, 0);
-
-  //// Wide Angle
-  // s->set_hmirror(s, 1);
-  // s->set_vflip(s, 1);
 
   // Set your Static IP address
   IPAddress local_IP(192, 168, 1, 66);
@@ -470,4 +483,20 @@ void setup() {
                           APP_CPU);
 }
 
-void loop() { vTaskDelay(1000); }
+void checkWiFiConnection() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Wi-Fi connection lost. Reconnecting...");
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(1000);
+      Serial.print(".");
+    }
+    Serial.println("Wi-Fi reconnected.");
+  }
+}
+
+void loop() {
+  Serial.println(WiFi.RSSI());
+  vTaskDelay(1000);
+  checkWiFiConnection();
+}
