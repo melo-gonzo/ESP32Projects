@@ -395,7 +395,7 @@ void setup() {
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 8000000;
-  config.frame_size = FRAMESIZE_VGA;
+  config.frame_size = FRAMESIZE_SVGA;
   config.pixel_format = PIXFORMAT_JPEG; // for streaming
   // config.pixel_format = PIXFORMAT_RGB565; // for face detection/recognition
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
@@ -433,9 +433,9 @@ void setup() {
   // s->set_vflip(s, 0);
 
   // Set your Static IP address
-  IPAddress local_IP(192, 168, 1, 66);
+  IPAddress local_IP(192, 168, 4, 64);
   // Set your Gateway IP address
-  IPAddress gateway(192, 168, 1, 1);
+  IPAddress gateway(192, 168, 4, 1);
   IPAddress subnet(255, 255, 255, 0);
   IPAddress primaryDNS(8, 8, 8, 8);   // optional
   IPAddress secondaryDNS(8, 8, 4, 4); // optional
@@ -477,7 +477,8 @@ void checkWiFiConnection() {
 }
 
 void loop() {
-  Serial.println(WiFi.RSSI());
+  // Serial.println(WiFi.RSSI());
   vTaskDelay(1000);
+  delay(10);
   checkWiFiConnection();
 }
