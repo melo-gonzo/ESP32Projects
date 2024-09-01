@@ -30,6 +30,8 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 
+#include <esp_task_wdt.h>
+
 #include <driver/rtc_io.h>
 #include <esp_bt.h>
 #include <esp_sleep.h>
@@ -39,12 +41,73 @@
 #define CAMERA_MODEL_AI_THINKER
 // #define CAMERA_MODEL_XIAO_ESP32S3 // Has PSRAM
 
-
 #include "camera_pins.h"
 
 void startCameraServer();
 
 #include "wifikeys.h"
+
+const unsigned long WIFI_RECONNECT_INTERVAL = 5000;         // 5 seconds
+const unsigned long RESTART_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+unsigned long lastWifiReconnectAttempt = 0;
+unsigned long startTime = 0;
+
+void connectToWiFi();
+void checkWiFiConnection();
+void scheduledRestart();
+void connectToWiFi() {
+  // Set your Static IP address
+  IPAddress local_IP(192, 168, 4, 64);
+  // Set your Gateway IP address
+  IPAddress gateway(192, 168, 4, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  IPAddress primaryDNS(8, 8, 8, 8);   // optional
+  IPAddress secondaryDNS(8, 8, 4, 4); // optional
+
+  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
+    Serial.println("STA Failed to configure");
+  }
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+
+  int attemptCount = 0;
+  while (WiFi.status() != WL_CONNECTED && attemptCount < 20) {
+    delay(500);
+    Serial.print(".");
+    attemptCount++;
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi connected");
+    Serial.println("");
+    Serial.print("Stream Link: http://");
+    Serial.print(local_IP);
+    Serial.println("/mjpeg/1");
+  } else {
+    Serial.println("\nFailed to connect to WiFi. Restarting...");
+    ESP.restart();
+  }
+}
+
+void checkWiFiConnection() {
+  if (WiFi.status() != WL_CONNECTED) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastWifiReconnectAttempt >= WIFI_RECONNECT_INTERVAL) {
+      Serial.println("Reconnecting to WiFi...");
+      WiFi.disconnect();
+      WiFi.reconnect();
+      lastWifiReconnectAttempt = currentMillis;
+    }
+  }
+}
+
+void scheduledRestart() {
+  if (millis() - startTime >= RESTART_INTERVAL) {
+    Serial.println("Performing scheduled restart...");
+    ESP.restart();
+  }
+}
 
 OV2640 cam;
 
@@ -234,6 +297,8 @@ void streamCB(void *pvParameters) {
 
   xLastWakeTime = xTaskGetTickCount();
   for (;;) {
+    checkWiFiConnection();
+    scheduledRestart();
     // Default assumption we are running according to the FPS
     xFrequency = pdMS_TO_TICKS(1000 / FPS);
 
@@ -284,6 +349,7 @@ void streamCB(void *pvParameters) {
     }
     //  Let other tasks run after serving every client
     taskYIELD();
+    vTaskDelay(1);
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
 }
@@ -432,53 +498,20 @@ void setup() {
   // s->set_hmirror(s, 0);
   // s->set_vflip(s, 0);
 
-  // Set your Static IP address
-  IPAddress local_IP(192, 168, 4, 64);
-  // Set your Gateway IP address
-  IPAddress gateway(192, 168, 4, 1);
-  IPAddress subnet(255, 255, 255, 0);
-  IPAddress primaryDNS(8, 8, 8, 8);   // optional
-  IPAddress secondaryDNS(8, 8, 4, 4); // optional
+  esp_task_wdt_init(30, true); // 30 second timeout, panic on timeout
+  esp_task_wdt_add(NULL);      // Add current thread to WDT watch
 
-  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
-    Serial.println("STA Failed to configure");
-  }
-  WiFi.begin(ssid, password);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(F("."));
-  }
-  // ip = WiFi.localIP();
-  Serial.println(F("WiFi connected"));
-  Serial.println("");
-  Serial.print("Stream Link: ");
-  Serial.print(local_IP);
-  Serial.println("/mjpeg/1");
+  connectToWiFi();
   startCameraServer();
 
   // Start mainstreaming RTOS task
-  xTaskCreatePinnedToCore(mjpegCB, "mjpeg", 4 * 1024, NULL, 2, &tMjpeg,
+  xTaskCreatePinnedToCore(mjpegCB, "mjpeg", 8 * 1024, NULL, 2, &tMjpeg,
                           APP_CPU);
-}
-
-void checkWiFiConnection() {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Wi-Fi connection lost. Reconnecting...");
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(1000);
-      Serial.print(".");
-    }
-    Serial.println("Wi-Fi reconnected.");
-  }
+  startTime = millis();
 }
 
 void loop() {
   // Serial.println(WiFi.RSSI());
-  vTaskDelay(1000);
-  delay(10);
-  checkWiFiConnection();
+  esp_task_wdt_reset();                  // Reset watchdog timer
+  vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
 }
