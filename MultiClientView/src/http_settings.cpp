@@ -19,7 +19,9 @@
 #include "fb_gfx.h"
 #include "img_converters.h"
 #include "sdkconfig.h"
+#include <WiFi.h>
 #include <iostream>
+#include <time.h>
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
@@ -28,6 +30,10 @@
 #include "esp_log.h"
 static const char *TAG = "camera_httpd";
 #endif
+
+// Add these global variables
+unsigned long startTimeAGAIN = 0;
+char lastRestartTime[20] = {0};
 
 typedef struct {
   httpd_req_t *req;
@@ -83,6 +89,30 @@ static int ra_filter_run(ra_filter_t *filter, int value) {
   return filter->sum / filter->count;
 }
 #endif
+
+// Add this new handler function
+static esp_err_t wifi_status_handler(httpd_req_t *req) {
+  char json_response[256];
+  char ip_address[16];
+  int rssi = WiFi.RSSI();
+  unsigned long uptime = (millis() - startTimeAGAIN) / 1000; // uptime in seconds
+
+  // Format the JSON response
+  snprintf(json_response, sizeof(json_response),
+           "{\"connected\": %s,"
+           "\"ssid\": \"%s\","
+           "\"ip\": \"%s\","
+           "\"rssi\": %d,"
+           "\"uptime\": %lu,"
+           "\"lastRestart\": \"%s\"}",
+           WiFi.status() == WL_CONNECTED ? "true" : "false",
+           WiFi.SSID().c_str(), WiFi.localIP().toString().c_str(), rssi, uptime,
+           lastRestartTime);
+
+  httpd_resp_set_type(req, "application/json");
+  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+  return httpd_resp_send(req, json_response, strlen(json_response));
+}
 
 static esp_err_t bmp_handler(httpd_req_t *req) {
   camera_fb_t *fb = NULL;
@@ -642,6 +672,10 @@ static esp_err_t index_handler(httpd_req_t *req) {
 }
 
 void startCameraServer() {
+  httpd_uri_t wifi_status_uri = {.uri = "/wifi-status",
+                                 .method = HTTP_GET,
+                                 .handler = wifi_status_handler,
+                                 .user_ctx = NULL};
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.max_uri_handlers = 16;
 
@@ -791,6 +825,7 @@ void startCameraServer() {
     httpd_register_uri_handler(camera_httpd, &greg_uri);
     httpd_register_uri_handler(camera_httpd, &pll_uri);
     httpd_register_uri_handler(camera_httpd, &win_uri);
+    httpd_register_uri_handler(camera_httpd, &wifi_status_uri);
   }
 
   config.server_port += 1;
@@ -799,7 +834,7 @@ void startCameraServer() {
   if (httpd_start(&stream_httpd, &config) == ESP_OK) {
     httpd_register_uri_handler(stream_httpd, &stream_uri);
   }
-    // TODO: Hack to set xclk to 8M. Need to figure out how to do this legit.
+  // TODO: Hack to set xclk to 8M. Need to figure out how to do this legit.
   sensor_t *s = esp_camera_sensor_get();
   int res = s->set_xclk(s, LEDC_TIMER_0, 8);
 }

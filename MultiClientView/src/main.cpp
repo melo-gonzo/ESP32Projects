@@ -47,17 +47,22 @@ void startCameraServer();
 
 #include "wifikeys.h"
 
-const unsigned long WIFI_RECONNECT_INTERVAL = 5000;         // 5 seconds
-const unsigned long RESTART_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+const unsigned long WIFI_RECONNECT_INTERVAL = 5000; // 5 seconds
+const unsigned long RESTART_INTERVAL =
+    5 * 60 * 1000; // 24 * 60 * 60 * 1000; // 24 hours
 unsigned long lastWifiReconnectAttempt = 0;
 unsigned long startTime = 0;
+unsigned long lastWifiCheck = 0;
+unsigned long lastRestartCheck = 0;
+const unsigned long WIFI_CHECK_INTERVAL = 5000; // Check WiFi every 5 seconds
 
-void connectToWiFi();
+// void connectToWiFi();
 void checkWiFiConnection();
 void scheduledRestart();
-void connectToWiFi() {
+// Modify the connectToWiFi function to return a boolean
+bool connectToWiFi() {
   // Set your Static IP address
-  IPAddress local_IP(192, 168, 4, 64);
+  IPAddress local_IP(192, 168, 4, 68);
   // Set your Gateway IP address
   IPAddress gateway(192, 168, 4, 1);
   IPAddress subnet(255, 255, 255, 0);
@@ -66,6 +71,7 @@ void connectToWiFi() {
 
   if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
     Serial.println("STA Failed to configure");
+    return false;
   }
 
   WiFi.mode(WIFI_STA);
@@ -82,22 +88,23 @@ void connectToWiFi() {
     Serial.println("\nWiFi connected");
     Serial.println("");
     Serial.print("Stream Link: http://");
-    Serial.print(local_IP);
+    Serial.print(WiFi.localIP());
     Serial.println("/mjpeg/1");
+    return true;
   } else {
-    Serial.println("\nFailed to connect to WiFi. Restarting...");
-    ESP.restart();
+    Serial.println("\nFailed to connect to WiFi.");
+    return false;
   }
 }
 
 void checkWiFiConnection() {
   if (WiFi.status() != WL_CONNECTED) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - lastWifiReconnectAttempt >= WIFI_RECONNECT_INTERVAL) {
-      Serial.println("Reconnecting to WiFi...");
-      WiFi.disconnect();
-      WiFi.reconnect();
-      lastWifiReconnectAttempt = currentMillis;
+    Serial.println("WiFi connection lost. Attempting to reconnect...");
+    WiFi.disconnect();
+    if (connectToWiFi()) {
+      Serial.println("WiFi reconnected successfully.");
+    } else {
+      Serial.println("WiFi reconnection failed.");
     }
   }
 }
@@ -501,7 +508,17 @@ void setup() {
   esp_task_wdt_init(30, true); // 30 second timeout, panic on timeout
   esp_task_wdt_add(NULL);      // Add current thread to WDT watch
 
-  connectToWiFi();
+  if (!connectToWiFi()) {
+    Serial.println("Initial WiFi connection failed. Restarting...");
+    delay(3000);
+    ESP.restart();
+  }
+  // startTime = millis();
+  // time_t now = time(nullptr);
+  // // strftime(lastRestartTime, sizeof(lastRestartTime), "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+  // startCameraServer();
+
   startCameraServer();
 
   // Start mainstreaming RTOS task
@@ -512,6 +529,23 @@ void setup() {
 
 void loop() {
   // Serial.println(WiFi.RSSI());
-  esp_task_wdt_reset();                  // Reset watchdog timer
-  vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
+  unsigned long currentMillis = millis();
+
+  // Check WiFi connection
+  if (currentMillis - lastWifiCheck >= WIFI_CHECK_INTERVAL) {
+    checkWiFiConnection();
+    lastWifiCheck = currentMillis;
+  }
+
+  // Check for scheduled restart
+  if (currentMillis - lastRestartCheck >= 60000) { // Check every minute
+    scheduledRestart();
+    lastRestartCheck = currentMillis;
+  }
+
+  // Reset watchdog timer
+  esp_task_wdt_reset();
+
+  // Small delay to prevent tight looping
+  delay(100);
 }
